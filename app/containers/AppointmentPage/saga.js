@@ -16,6 +16,8 @@ import {
   PUT_BACK_APPOINTMENT,
   UPDATE_STATUS_APPOINTMENT,
   CANCEL_APPOINTMENT,
+  UPDATE_STATUS_APPOINTMENT_SUCCESS,
+  UPDATE_CALENDAR_INTERVAL,
 } from './constants';
 import {
   selectDay,
@@ -72,7 +74,7 @@ import {
 const headers = {
   'Content-Type': 'application/json',
   Authorization:
-    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJjMGQzOWM0NS0xZjEwLTRiMDgtYThlZS00OTFiYWFiYWMwODgiLCJleHAiOjE1NTQ1ODIyOTksImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.hMawtPCM6PXlc_tLcvYLI67k73fatrcNn8gK3sgCLI0',
+    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJhOTkxMzEwMy05MmY5LTQ2YWEtYTQ4MC0zNWYzZDkyMmUwN2QiLCJleHAiOjE1NTQ2MzY2ODIsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.2DfX5YxSsgQvICk6cdphjgP1PJO3_h3JRVfYxhsrFk8',
 };
 
 const appointmentAdapter = appointment => {
@@ -474,7 +476,14 @@ export function* appointmentsByMembersData() {
     LOAD_APPOINTMENTS_BY_MEMBERS,
     getAppointmentsByMembersAndDate,
   );
+  yield takeLatest(
+    UPDATE_STATUS_APPOINTMENT_SUCCESS,
+    getAppointmentsByMembersAndDate,
+  );
   yield takeLatest(SELECT_DAY, getAppointmentsByMembersAndDate);
+
+  // FIXME: This is hard code for real-time calendar
+  yield takeLatest(UPDATE_CALENDAR_INTERVAL, getAppointmentsByMembersAndDate);
 }
 
 export function* displayedMembersData() {

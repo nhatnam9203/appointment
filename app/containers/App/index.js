@@ -34,8 +34,7 @@ export default function App() {
       </Helmet>
       {/* <Header /> */}
       <Switch>
-        <Route exact path="/" component={AppointmentPage} />
-        <Route path="" component={NotFoundPage} />
+        <Route path="" component={AppointmentPage} />
       </Switch>
       {/* <Footer /> */}
       <GlobalStyle />

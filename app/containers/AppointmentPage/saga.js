@@ -1,6 +1,7 @@
 import { delay } from 'redux-saga';
 import { call, fork, put, takeLatest, all, select } from 'redux-saga/effects';
 import moment from 'moment';
+import axios from 'axios';
 
 import request from 'utils/request';
 
@@ -53,7 +54,7 @@ import {
   GET_MEMBERS_API,
   GET_WAITING_APPOINTMENTS_API,
   GET_APPOINTMENTS_BY_MEMBERS_DATE_API,
-  // POST_ASSIGN_APPOINTMENT_API,
+  POST_ASSIGN_APPOINTMENT_API,
   // POST_MOVE_APPOINTMENT_API,
   // POST_PUT_BACK_APPOINTMENT_API
   // POST_CANCEL_APPOINTMENT_API
@@ -71,10 +72,12 @@ import {
 
 /* **************************** API Caller ********************************* */
 
+// eslint-disable-next-line no-restricted-globals
+const token = location.search.replace('?token=', '');
+
 const headers = {
   'Content-Type': 'application/json',
-  Authorization:
-    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJmYjRiYjE5MS1jN2IwLTRjZTUtODdjZC0wNTQwODFmNTk0NzQiLCJleHAiOjE1NTQ2MzExOTcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.4uK70wlK-w_3bWR-VODZcpZrZaCvIRVbmVhM6UT6cRM',
+  Authorization: `Bearer ${token}`,
 };
 
 const appointmentAdapter = appointment => {
@@ -242,39 +245,41 @@ export function* getAppointmentsByMembersAndDate() {
 export function* assignAppointment(action) {
   const displayedMembers = yield select(makeSelectDisplayedMembers());
   const assignedMember = displayedMembers[action.resourceId];
-  const appointment = {
-    ...action.eventData,
-    memberId: assignedMember.id,
-  };
 
-  try {
-    /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    yield delay(200);
-    const result = mockedPostAppointment;
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+  assignedMember.id = assignedMember.id || 0;
 
-    /* ------------------ REAL DATA FROM API BLOCK ------------------- */
-    /* --------------------------------------------------------------- */
-    // const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
-    // const options = {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     memberId: appointment.memberId,
-    //     appointmentId: appointment.id,
-    //   }),
-    // };
-    // const result = yield call(request, requestURL.toString(), options);
-    /* --------------------------------------------------------------- */
-    /* --------------------------------------------------------------- */
-    if (result) {
-      yield put(appointmentAssigned(appointment));
-    } else {
-      yield put(appointmentAssigningError(result));
+  if (assignedMember.id !== 0) {
+    const appointment = {
+      ...action.eventData,
+      memberId: assignedMember.id,
+    };
+
+    try {
+      /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
+      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+      // yield delay(200);
+      // const result = mockedPostAppointment;
+      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+
+      /* ------------------ REAL DATA FROM API BLOCK ------------------- */
+      /* --------------------------------------------------------------- */
+      const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
+      const formData = new FormData();
+      formData.append('FromTime', appointment.start);
+      formData.append('staff_id', appointment.memberId);
+      formData.append('appointment_id', appointment.id);
+      const result = dragAppointment(requestURL.toString(), formData);
+      /* --------------------------------------------------------------- */
+      /* --------------------------------------------------------------- */
+      if (result) {
+        yield put(appointmentAssigned(appointment));
+      } else {
+        yield put(appointmentAssigningError(result));
+      }
+    } catch (err) {
+      yield put(appointmentAssigningError(err));
     }
-  } catch (err) {
-    yield put(appointmentAssigningError(err));
   }
 }
 
@@ -299,41 +304,42 @@ export function* moveAppointment(action) {
     yield put(appointmentMovingError('Cannot find moved appointment.'));
   }
 
-  const appointment = {
-    ...movedAppointment,
-    start: action.newTime,
-    end: action.newEndTime,
-    memberId: assignedMember.id,
-  };
+  assignedMember.id = assignedMember.id || 0;
 
-  try {
-    /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    yield delay(200);
-    const result = mockedPostAppointment;
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+  if (assignedMember.id !== 0) {
+    const appointment = {
+      ...movedAppointment,
+      start: action.newTime,
+      end: action.newEndTime,
+      memberId: assignedMember.id,
+    };
 
-    /* ------------------ REAL DATA FROM API BLOCK ------------------- */
-    /* --------------------------------------------------------------- */
-    // const requestURL = new URL(POST_MOVE_APPOINTMENT_API);
-    // const options = {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     memberId: appointment.memberId,
-    //     appointmentId: appointment.id,
-    //   }),
-    // };
-    // const result = yield call(request, requestURL.toString(), options);
-    /* --------------------------------------------------------------- */
-    /* --------------------------------------------------------------- */
-    if (result) {
-      yield put(appointmentMoved(appointment));
-    } else {
-      yield put(appointmentMovingError(result));
+    try {
+      /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
+      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+      // yield delay(200);
+      // const result = mockedPostAppointment;
+      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+
+      /* ------------------ REAL DATA FROM API BLOCK ------------------- */
+      /* --------------------------------------------------------------- */
+      const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
+      const formData = new FormData();
+      formData.append('FromTime', appointment.start);
+      formData.append('staff_id', appointment.memberId);
+      formData.append('appointment_id', appointment.id);
+      const result = dragAppointment(requestURL.toString(), formData);
+      /* --------------------------------------------------------------- */
+      /* --------------------------------------------------------------- */
+      if (result) {
+        yield put(appointmentMoved(appointment));
+      } else {
+        yield put(appointmentMovingError(result));
+      }
+    } catch (err) {
+      yield put(appointmentMovingError(err));
     }
-  } catch (err) {
-    yield put(appointmentMovingError(err));
   }
 }
 
@@ -530,4 +536,20 @@ export default function* root() {
     fork(updateStatusAppointmentData),
     fork(cancelAppointmentData),
   ]);
+}
+
+async function dragAppointment(api, formData) {
+  const result = await axios({
+    method: 'POST',
+    url: api,
+    data: formData,
+    headers,
+    config: {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  });
+
+  return result;
 }

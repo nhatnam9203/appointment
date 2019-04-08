@@ -48,6 +48,7 @@ import {
   UPDATE_STATUS_APPOINTMENT,
   UPDATE_STATUS_APPOINTMENT_SUCCESS,
   UPDATE_STATUS_APPOINTMENT_ERROR,
+  UPDATE_CALENDAR_INTERVAL,
 } from './constants';
 
 /**
@@ -290,14 +291,21 @@ export function appointmentAssigningError(error) {
  * @param  {number} appointmentId The url options
  * @param  {number} newPositionIndex The url options
  * @param  {object} newTime The url options
+ * @param  {object} newEndTime The url options
  * @return {object} An action object with a type of MOVE_APPOINTMENT
  */
-export function moveAppointment(appointmentId, newPositionIndex, newTime) {
+export function moveAppointment(
+  appointmentId,
+  newPositionIndex,
+  newTime,
+  newEndTime,
+) {
   return {
     type: MOVE_APPOINTMENT,
     appointmentId,
     newPositionIndex,
     newTime,
+    newEndTime,
   };
 }
 
@@ -430,5 +438,12 @@ export function appointmentUpdatingStatusError(error) {
   return {
     type: UPDATE_STATUS_APPOINTMENT_ERROR,
     error,
+  };
+}
+
+// FIXME: This is hard code for real-time calendar
+export function updateCalendarInterval() {
+  return {
+    type: UPDATE_CALENDAR_INTERVAL,
   };
 }

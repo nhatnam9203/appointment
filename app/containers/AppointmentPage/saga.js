@@ -55,10 +55,10 @@ import {
   GET_WAITING_APPOINTMENTS_API,
   GET_APPOINTMENTS_BY_MEMBERS_DATE_API,
   POST_ASSIGN_APPOINTMENT_API,
-  // POST_MOVE_APPOINTMENT_API,
+  POST_MOVE_APPOINTMENT_API,
   // POST_PUT_BACK_APPOINTMENT_API
   // POST_CANCEL_APPOINTMENT_API
-  // POST_STATUS_APPOINTMENT_API
+  POST_STATUS_APPOINTMENT_API,
 } from '../../../app-constants';
 
 // import { members as mockedMembers } from '../../assets/mocks/members';
@@ -71,13 +71,21 @@ import {
 } from '../../components/Calendar/constants';
 
 /* **************************** API Caller ********************************* */
-
 // eslint-disable-next-line no-restricted-globals
 const token = location.search.replace('?token=', '');
 
 const headers = {
   'Content-Type': 'application/json',
   Authorization: `Bearer ${token}`,
+};
+
+const statusConvertKey = {
+  UnConfirm: 'ASSIGNED',
+  Confirm: 'CONFIRMED',
+  CheckIn: 'CHECKED_IN',
+  Paid: 'PAID',
+  Waiting: 'WAITING',
+  Cancel: 'CANCEL',
 };
 
 const appointmentAdapter = appointment => {
@@ -87,6 +95,8 @@ const appointmentAdapter = appointment => {
       options.push({
         id: service.id,
         name: service.name,
+        duration: service.duration,
+        price: service.price,
       });
     });
   }
@@ -100,15 +110,13 @@ const appointmentAdapter = appointment => {
   //     options.push(service.name);
   //   });
   // }
+  console.log(appointment);
   return {
     id: appointment.id,
     userFullName: appointment.userFullName,
     phoneNumber: appointment.phoneNumber,
     options,
-    status:
-      appointment.status.toUpperCase() === 'UNCONFIRM'
-        ? 'ASSIGNED'
-        : 'CONFIRMED',
+    status: statusConvertKey[appointment.status],
     memberId: appointment.staffId,
     start: appointment.start,
     end: appointment.end,
@@ -124,6 +132,17 @@ const memberAdapter = member => ({
     'https://png.pngtree.com/svg/20161027/631929649c.svg',
   orderNumber: member.orderNumber,
 });
+
+const statusConvertData = {
+  ASSIGNED: 'UnConfirm',
+  CONFIRMED: 'Confirm',
+  CHECKED_IN: 'CheckIn',
+  PAID: 'Paid',
+  WAITING: 'Waiting',
+  CANCEL: 'Cancel',
+};
+
+const statusAdapter = status => statusConvertData[status];
 
 export function* getMembers() {
   try {
@@ -245,41 +264,36 @@ export function* getAppointmentsByMembersAndDate() {
 export function* assignAppointment(action) {
   const displayedMembers = yield select(makeSelectDisplayedMembers());
   const assignedMember = displayedMembers[action.resourceId];
+  const appointment = {
+    ...action.eventData,
+    memberId: assignedMember.id,
+  };
 
-  assignedMember.id = assignedMember.id || 0;
+  try {
+    /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
+    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+    // yield delay(200);
+    // const result = mockedPostAppointment;
+    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
 
-  if (assignedMember.id !== 0) {
-    const appointment = {
-      ...action.eventData,
-      memberId: assignedMember.id,
-    };
-
-    try {
-      /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
-      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-      // yield delay(200);
-      // const result = mockedPostAppointment;
-      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-
-      /* ------------------ REAL DATA FROM API BLOCK ------------------- */
-      /* --------------------------------------------------------------- */
-      const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
-      const formData = new FormData();
-      formData.append('FromTime', appointment.start);
-      formData.append('staff_id', appointment.memberId);
-      formData.append('appointment_id', appointment.id);
-      const result = dragAppointment(requestURL.toString(), formData);
-      /* --------------------------------------------------------------- */
-      /* --------------------------------------------------------------- */
-      if (result) {
-        yield put(appointmentAssigned(appointment));
-      } else {
-        yield put(appointmentAssigningError(result));
-      }
-    } catch (err) {
-      yield put(appointmentAssigningError(err));
+    /* ------------------ REAL DATA FROM API BLOCK ------------------- */
+    /* --------------------------------------------------------------- */
+    const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
+    const formData = new FormData();
+    formData.append('FromTime', appointment.start);
+    formData.append('staff_id', appointment.memberId);
+    formData.append('appointment_id', appointment.id);
+    const result = dragAppointment(requestURL.toString(), formData);
+    /* --------------------------------------------------------------- */
+    /* --------------------------------------------------------------- */
+    if (result) {
+      yield put(appointmentAssigned(appointment));
+    } else {
+      yield put(appointmentAssigningError(result));
     }
+  } catch (err) {
+    yield put(appointmentAssigningError(err));
   }
 }
 
@@ -304,42 +318,38 @@ export function* moveAppointment(action) {
     yield put(appointmentMovingError('Cannot find moved appointment.'));
   }
 
-  assignedMember.id = assignedMember.id || 0;
+  const appointment = {
+    ...movedAppointment,
+    start: action.newTime,
+    end: action.newEndTime,
+    memberId: assignedMember.id,
+  };
 
-  if (assignedMember.id !== 0) {
-    const appointment = {
-      ...movedAppointment,
-      start: action.newTime,
-      end: action.newEndTime,
-      memberId: assignedMember.id,
-    };
+  try {
+    /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
+    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+    // yield delay(200);
+    // const result = mockedPostAppointment;
+    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
 
-    try {
-      /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
-      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-      // yield delay(200);
-      // const result = mockedPostAppointment;
-      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-      /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-
-      /* ------------------ REAL DATA FROM API BLOCK ------------------- */
-      /* --------------------------------------------------------------- */
-      const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
-      const formData = new FormData();
-      formData.append('FromTime', appointment.start);
-      formData.append('staff_id', appointment.memberId);
-      formData.append('appointment_id', appointment.id);
-      const result = dragAppointment(requestURL.toString(), formData);
-      /* --------------------------------------------------------------- */
-      /* --------------------------------------------------------------- */
-      if (result) {
-        yield put(appointmentMoved(appointment));
-      } else {
-        yield put(appointmentMovingError(result));
-      }
-    } catch (err) {
-      yield put(appointmentMovingError(err));
+    /* ------------------ REAL DATA FROM API BLOCK ------------------- */
+    /* --------------------------------------------------------------- */
+    const requestURL = new URL(POST_MOVE_APPOINTMENT_API);
+    const formData = new FormData();
+    formData.append('FromTime', appointment.start);
+    formData.append('staff_id', appointment.memberId);
+    formData.append('appointment_id', appointment.id);
+    const result = dragAppointment(requestURL.toString(), formData);
+    /* --------------------------------------------------------------- */
+    /* --------------------------------------------------------------- */
+    if (result) {
+      yield put(appointmentMoved(appointment));
+    } else {
+      yield put(appointmentMovingError(result));
     }
+  } catch (err) {
+    yield put(appointmentMovingError(err));
   }
 }
 
@@ -424,22 +434,67 @@ export function* updateStatusAppointment(action) {
   try {
     /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    yield delay(200);
-    const result = mockedPostAppointment;
+    // yield delay(200);
+    // const result = mockedPostAppointment;
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
-    // const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    // const options = {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     appointmentId: action.appointmentId,
-    //     status: fcEvent.data.status
-    //   }),
-    // };
-    // const result = yield call(request, requestURL.toString(), options);
+    const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
+    // const formData = new FormData();
+    // formData.append('id', fcEvent.data.id);
+    // formData.append('Staff_id', fcEvent.data.memberId);
+    // formData.append('StoreId', 1);
+    // formData.append('FromTime', fcEvent.data.start);
+    // formData.append('ToTime', fcEvent.data.end);
+    // formData.append('TipPercent', 1);
+    // formData.append('User_id', 1);
+    // formData.append('total', 1);
+    // formData.append('duration', 1);
+    // formData.append('waitingtime', 1);
+    // formData.append('CheckinStatus', statusAdapter(fcEvent.data.status));
+    // formData.append('PaidStatus', 'false');
+    // formData.append('Status', 1);
+    // formData.append('CreateDate', fcEvent.data.start);
+    // formData.append(
+    //   'BookingServices2',
+    //   `[${action.bookingServices.join(', ')}]`,
+    // );
+    // const result = dragAppointment(requestURL.toString(), formData);
+
+    let status = statusAdapter(fcEvent.data.status);
+
+    if (status == 'UnConfirm') {
+      status = 'Confirm';
+    } else if (status == 'Confirm') {
+      status = 'CheckIn';
+    } else if (status == 'CheckIn') {
+      status = 'Paid';
+    }
+
+    const options = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        id: fcEvent.data.id,
+        Staff_id: fcEvent.data.memberId,
+        StoreId: 1,
+        FromTime: fcEvent.data.start,
+        ToTime: fcEvent.data.end,
+        TipPercent: null,
+        User_id: null,
+        total: 1,
+        duration: 1,
+        waitingtime: 1,
+        CheckinStatus: status,
+        PaidStatus: false,
+        Status: 1,
+        CreateDate: fcEvent.data.start,
+        BookingServices2: action.bookingServices,
+      }),
+    };
+    const result = yield call(request, requestURL.toString(), options);
     /* --------------------------------------------------------------- */
     /* --------------------------------------------------------------- */
     if (result) {
@@ -539,7 +594,7 @@ export default function* root() {
 }
 
 async function dragAppointment(api, formData) {
-  const result = await axios({
+  return axios({
     method: 'POST',
     url: api,
     data: formData,
@@ -550,6 +605,4 @@ async function dragAppointment(api, formData) {
       },
     },
   });
-
-  return result;
 }

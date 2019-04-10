@@ -48,7 +48,6 @@ AppPopupWrapper.Body = styled.div`
 AppPopupWrapper.Footer = styled.div`
   display: flex;
   padding: 0.5rem 1rem 1rem 1rem;
-
   & > div {
     width: 50%;
     text-align: center;
@@ -86,7 +85,6 @@ AppointmentWrapper.Footer = styled(AppPopupWrapper.Footer)`
 const UserInformation = styled.div`
   display: flex;
   padding: 0.5rem;
-
   & > div {
     width: 50%;
     display: flex;
@@ -114,7 +112,6 @@ const NoteWrapper = styled.div`
 
 NoteWrapper.Form = styled.form`
   display: flex;
-
   & > input {
     flex: 1;
     background: #ffffff;
@@ -139,12 +136,10 @@ NoteWrapper.Form = styled.form`
 const NoteInformation = styled.div`
   display: flex;
   padding: 0.5rem;
-
   & > div:nth-child(1),
   & > div:nth-child(2) {
     width: 20%;
   }
-
   & > div:last-child {
     width: 60%;
   }
@@ -153,7 +148,6 @@ const NoteInformation = styled.div`
 const AppointmentInformation = styled.div`
   display: flex;
   padding: 0.5rem;
-
   & > div {
     width: 30%;
     display: flex;
@@ -211,35 +205,8 @@ class Appointment extends React.Component {
   state = {
     noteValue: '',
     confirmationModal: false,
-    services: [
-      {
-        name: 'Service 1',
-        price: 50,
-        duration: 15,
-      },
-      {
-        name: 'Service 2',
-        price: 50,
-        duration: 15,
-      },
-      {
-        name: 'Service 3',
-        price: 50,
-        duration: 15,
-      },
-    ],
-    products: [
-      {
-        name: 'Product 1',
-        price: 20,
-        amount: 5,
-      },
-      {
-        name: 'Product 2',
-        price: 20,
-        amount: 5,
-      },
-    ],
+    services: [],
+    products: [],
     notes: [
       {
         name: 'Rickie Da Vinci',
@@ -257,8 +224,8 @@ class Appointment extends React.Component {
   subtractService(index) {
     this.setState(state => {
       const { services } = state;
-      if (services[index].duration >= 15) {
-        services[index].duration -= 15;
+      if (services[index].duration >= 10) {
+        services[index].duration -= 10;
       }
       return {
         services,
@@ -269,7 +236,7 @@ class Appointment extends React.Component {
   addService(index) {
     this.setState(state => {
       const { services } = state;
-      services[index].duration += 15;
+      services[index].duration += 10;
       return {
         services,
       };
@@ -322,7 +289,7 @@ class Appointment extends React.Component {
     const { services, products } = this.state;
     let total = 0;
     services.forEach(service => {
-      total += service.price * (service.duration / 15);
+      total += service.price * (service.duration / 10);
     });
     products.forEach(product => {
       total += product.price * product.amount;
@@ -333,6 +300,14 @@ class Appointment extends React.Component {
   closeModal() {
     const { deselectAppointment } = this.props;
     deselectAppointment();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.appointment) {
+      this.setState({
+        services: nextProps.appointment.options,
+      });
+    }
   }
 
   openConfirmationModal() {
@@ -355,7 +330,11 @@ class Appointment extends React.Component {
 
   nextStatus() {
     const { appointment, nextStatus } = this.props;
-    nextStatus(appointment.id);
+    const { services } = this.state;
+    const servicesUpdate = services.map(
+      service => `${service.id}@${service.duration}@${appointment.memberId}`,
+    );
+    nextStatus(appointment.id, servicesUpdate);
   }
 
   renderHeader() {
@@ -434,11 +413,11 @@ class Appointment extends React.Component {
         <td>{service.name}</td>
         <td style={{ textAlign: 'center' }}>
           <AdjustButton
-            active={appointment.status !== 'PAID' && service.duration > 15}
-            disabled={appointment.status === 'PAID' || service.duration <= 15}
+            active={appointment.status !== 'PAID' && service.duration > 10}
+            disabled={appointment.status === 'PAID' || service.duration <= 10}
             onClick={() => this.subtractService(index)}
           >
-            -15&#39;
+            -10&#39;
           </AdjustButton>
           {service.duration}
           <AdjustButton
@@ -446,11 +425,11 @@ class Appointment extends React.Component {
             disabled={appointment.status === 'PAID' || service.duration >= 90}
             onClick={() => this.addService(index)}
           >
-            +15&#39;
+            +10&#39;
           </AdjustButton>
         </td>
         <td style={{ textAlign: 'center' }}>
-          {service.price * (service.duration / 15)}
+          {service.price * (service.duration / 10)}
         </td>
       </tr>
     );
@@ -582,6 +561,7 @@ class Appointment extends React.Component {
         <AppointmentPopup
           closeOnDocumentClick
           open
+          onOpen={() => this.openModal()}
           onClose={() => this.closeModal()}
         >
           <AppointmentWrapper>

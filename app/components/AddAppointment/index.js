@@ -213,6 +213,9 @@ const NoteInformation = styled.div`
   }
 `;
 
+const token = location.search.replace('?token=', '');
+
+
 class AddAppointment extends React.Component {
   state = {
     isOpenSearchingPopup: true,
@@ -239,15 +242,15 @@ class AddAppointment extends React.Component {
     closeAddingAppointment();
   }
 
-  handleSubmit(e) {
+  handleSubmitVerifyPhone(e) {
     e.preventDefault();
     const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/FindUserByPhone'
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
+    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
     let formdt = new FormData();
     formdt.append('phone', this.state.phoneNumber);
     axios.post(api, formdt, {
       headers: {
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${token}`,
       }
     }).then((result) => {
       if (result.data.data === "{}") {
@@ -263,10 +266,10 @@ class AddAppointment extends React.Component {
       }
     })
   }
-  handleSubmitAddApontMent = () => {
+  handleSubmitAppointment = () => {
     const {first_name,last_name,phoneNumber} = this.state;
     const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/AddNewUser'
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
+    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
     let formdt = new FormData();
     formdt.append('first_name',first_name);
     formdt.append('last_name',last_name);
@@ -275,7 +278,7 @@ class AddAppointment extends React.Component {
       first_name,last_name,phone : phoneNumber
     }, {
       headers: {
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${token}`,
         "Content-Type" : "application/json",
       }
     }).then((result) => {
@@ -345,7 +348,7 @@ class AddAppointment extends React.Component {
             </SearchingWrapper.Header>
             <SearchingWrapper.Body>Enter phone number</SearchingWrapper.Body>
             <SearchingWrapper.Footer>
-              <Form onSubmit={e => this.handleSubmit(e)}>
+              <Form onSubmit={e => this.handleSubmitVerifyPhone(e)}>
                 <input
                   value={this.state.phoneNumber}
                   onChange={e => this.handleChange(e)}
@@ -409,7 +412,7 @@ class AddAppointment extends React.Component {
             <AddingWrapper.Footer>
               <div>
                 <Button
-                  onClick={this.handleSubmitAddApontMent}
+                  onClick={this.handleSubmitAppointment}
                   type="button" primary>
                   Next
                 </Button>

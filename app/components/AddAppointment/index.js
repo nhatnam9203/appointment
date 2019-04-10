@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Popup from 'reactjs-popup';
 import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
-
+import axios from 'axios'
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
   padding: 0 !important;
@@ -217,9 +217,16 @@ class AddAppointment extends React.Component {
   state = {
     isOpenSearchingPopup: true,
     isOpenAddingPopup: false,
+    first_name: '',
+    last_name: '',
+    phone: '',
     phoneNumber: '',
     noteValue: '',
     notes: [],
+
+    error_phone: '',
+    success_addApointment:'',
+    error_addApointment : '',
   };
 
   closeAllModal() {
@@ -234,10 +241,64 @@ class AddAppointment extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.setState({
-      isOpenSearchingPopup: false,
-      isOpenAddingPopup: true,
-    });
+    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/FindUserByPhone'
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
+    let formdt = new FormData();
+    formdt.append('phone', this.state.phoneNumber);
+    axios.post(api, formdt, {
+      headers: {
+        Authorization: "Bearer " + token,
+      }
+    }).then((result) => {
+      if (result.data.data === "{}") {
+        this.setState({
+          isOpenSearchingPopup: false,
+          isOpenAddingPopup: true,
+        });
+      } else {
+        this.setState({ error_phone: 'This phone number already exist !!!' })
+        setTimeout(() => {
+          this.setState({ error_phone: '' })
+        }, 3000);
+      }
+    })
+  }
+  handleSubmitAddApontMent = () => {
+    const {first_name,last_name,phoneNumber} = this.state;
+    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/AddNewUser'
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
+    let formdt = new FormData();
+    formdt.append('first_name',first_name);
+    formdt.append('last_name',last_name);
+    formdt.append('phone',phoneNumber);
+    axios.post(api,{
+      first_name,last_name,phone : phoneNumber
+    }, {
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type" : "application/json",
+      }
+    }).then((result) => {
+      if (result.data.data === "{}") {
+
+      } else {
+        this.setState({ 
+          first_name : '',
+          last_name : '',
+          phone : '',
+          phoneNumber : '',
+          success_addApointment : 'Inserted customer',
+        });
+        setTimeout(() => {
+          this.setState({
+            isOpenSearchingPopup: false,
+            isOpenAddingPopup: false,
+            success_addApointment : '',
+          })
+        }, 2000);
+      }
+    })
+
   }
 
   handleChange(e) {
@@ -263,8 +324,10 @@ class AddAppointment extends React.Component {
     </NoteInformation>
   );
 
+ 
+
   render() {
-    const { isOpenSearchingPopup, isOpenAddingPopup, notes } = this.state;
+    const { isOpenSearchingPopup, isOpenAddingPopup, notes, error_phone,success_addApointment } = this.state;
     const { appointment } = this.props;
     if (!appointment) return '';
     return (
@@ -293,6 +356,7 @@ class AddAppointment extends React.Component {
                     Next
                   </Button>
                 </div>
+                {error_phone && <p style={{ color: 'red' }}>{error_phone}</p>}
               </Form>
             </SearchingWrapper.Footer>
           </SearchingWrapper>
@@ -311,6 +375,7 @@ class AddAppointment extends React.Component {
             </AddingWrapper.Header>
             <AddingWrapper.Body>
               <Form onSubmit={e => e.preventDefault()}>
+              {success_addApointment&&<p style={{ color:'#8D9440' }}>{success_addApointment}</p>}
                 <Label>Phone number is not exist ! Get information !</Label>
                 <input value={this.state.phoneNumber} type="number" disabled />
               </Form>
@@ -319,18 +384,18 @@ class AddAppointment extends React.Component {
                 <div
                   style={{ display: 'flex', justifyContent: 'space-between' }}
                 >
-                  <input placeholder="First Name" className="w-50" />
-                  <input placeholder="Last Name" className="w-50" />
+                  <input value={this.state.first_name} onChange={e => this.setState({ first_name: e.target.value })} placeholder="First Name" className="w-50" />
+                  <input value={this.state.last_name} onChange={e => this.setState({ last_name: e.target.value })} placeholder="Last Name" className="w-50" />
                 </div>
               </Form>
               <Form className="left" onSubmit={e => e.preventDefault()}>
                 <Label>Referrer Phone Number</Label>
-                <input placeholder="0123 123 123" />
+                <input value={this.state.phone} onChange={e => this.setState({ phone: e.target.value })} placeholder="Phone number" />
               </Form>
               <NoteWrapper>
                 <Label>Note:</Label>
                 {notes.map(this.renderNote)}
-                <NoteWrapper.Form onSubmit={e => this.handleSubmitNote(e)}>
+                <NoteWrapper.Form onSubmit={e => e.preventDefault()}>
                   <input
                     value={this.state.noteValue}
                     onChange={e => this.handleChangeNote(e)}
@@ -343,7 +408,9 @@ class AddAppointment extends React.Component {
             </AddingWrapper.Body>
             <AddingWrapper.Footer>
               <div>
-                <Button type="submit" primary>
+                <Button
+                  onClick={this.handleSubmitAddApontMent}
+                  type="button" primary>
                   Next
                 </Button>
               </div>

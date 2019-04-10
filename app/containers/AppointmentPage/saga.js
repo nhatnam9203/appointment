@@ -110,7 +110,7 @@ const appointmentAdapter = appointment => {
   //     options.push(service.name);
   //   });
   // }
-  console.log(appointment);
+  // console.log(appointment);
   return {
     id: appointment.id,
     userFullName: appointment.userFullName,

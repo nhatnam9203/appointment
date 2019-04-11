@@ -5,6 +5,7 @@ import Popup from 'reactjs-popup';
 import moment from 'moment';
 import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
+import axios from 'axios'
 
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
@@ -201,6 +202,9 @@ ConfirmationWrapper.Footer = styled(AppPopupWrapper.Footer)`
   //
 `;
 
+
+const token = location.search.replace('?token=', '');
+
 class Appointment extends React.Component {
   state = {
     noteValue: '',
@@ -296,6 +300,15 @@ class Appointment extends React.Component {
     });
     return total;
   }
+  getTotalDuration() {
+    const { services } = this.state;
+    let total = 0;
+    services.forEach(service => {
+      total += service.duration;
+    });
+    return total;
+  }
+  
 
   closeModal() {
     const { deselectAppointment } = this.props;
@@ -314,6 +327,7 @@ class Appointment extends React.Component {
     this.setState({
       confirmationModal: true,
     });
+    console.log(this.props.appointment);
   }
 
   closeConfirmationModal() {
@@ -325,7 +339,12 @@ class Appointment extends React.Component {
   confirmCancelAppointment() {
     this.closeConfirmationModal();
     const { appointment, cancelAppointment } = this.props;
+    const {services} = this.state;
     cancelAppointment(appointment.id);
+    const servicesUpdate = services.map(
+      service => `${service.id}@${service.duration}@${appointment.memberId}`,
+    );
+    this.updateStatus("Waiting",servicesUpdate)
   }
 
   nextStatus() {
@@ -334,7 +353,57 @@ class Appointment extends React.Component {
     const servicesUpdate = services.map(
       service => `${service.id}@${service.duration}@${appointment.memberId}`,
     );
+    if(appointment.status === "CONFIRMED"){
+      this.updateStatus("CheckIn",servicesUpdate)
+    }
+    if(appointment.status === "ASSIGNED"){
+      this.updateStatus("Confirm",servicesUpdate)
+    }
+    if(appointment.status === "CHECKED_IN"){
+      this.updateStatusPaid(appointment.id);
+    }
     nextStatus(appointment.id, servicesUpdate);
+  }
+
+  updateStatusPaid=(idAppointmet)=>{
+    window.postMessage(JSON.stringify({
+      appointmentId : idAppointmet,
+      action : 'checkout'
+    }))
+  }
+
+  updateStatus(status,servicesUpdate){
+    const {appointment} = this.props;
+    const {id,memberId,end,start} = appointment;
+    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/Update'
+    axios.post(api,{
+      id,
+      Staff_id: memberId,
+      StoreId : 1,
+      FromTime : start,
+      ToTime : end,
+      total : this.getTotalPrice(),
+      duration : this.getTotalDuration(),
+      CheckinStatus:status,
+      PaidStatus : true,
+      Status : 1,
+      CreateDate : new Date().toString().substring(0,15),
+      BookingServices2 : servicesUpdate,
+      User_id : 8, 
+    },{
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type" : "application/json",
+      }
+    }).then(result=>{
+      if(result.data.codeStatus === 1){
+        window.postMessage(JSON.stringify({
+          appointmentId : id,
+          action : 'checkout'
+        }))
+        console.log(result.data);
+      }
+    })
   }
 
   renderHeader() {
@@ -362,7 +431,7 @@ class Appointment extends React.Component {
     }
     if (appointment.status === 'PAID') {
       return (
-        <AppointmentWrapper.Header backgroundColor="#00dc00">
+        <AppointmentWrapper.Header backgroundColor="#00b4f7">
           Paid Appointment
         </AppointmentWrapper.Header>
       );

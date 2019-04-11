@@ -59,6 +59,7 @@ import {
   // POST_PUT_BACK_APPOINTMENT_API
   // POST_CANCEL_APPOINTMENT_API
   POST_STATUS_APPOINTMENT_API,
+  POST_UPDATE_APPOINTMENT_API
 } from '../../../app-constants';
 
 // import { members as mockedMembers } from '../../assets/mocks/members';
@@ -195,6 +196,7 @@ export function* getWaitingAppointments() {
       method: 'POST',
       headers,
     });
+
     const appointments =
       response &&
       response.data &&
@@ -236,11 +238,13 @@ export function* getAppointmentsByMembersAndDate() {
       date: apiDateQuery,
       memberId: apiMemberIdsQuery,
     });
+
     const response = yield call(request, requestURL.toString(), {
       method: 'POST',
       headers,
       body: requestBody,
     });
+    // console.log(response);
     const appointments =
       response &&
       response.data &&
@@ -250,9 +254,11 @@ export function* getAppointmentsByMembersAndDate() {
     const appointmentsMembers = displayedMembers.map(member => ({
       memberId: member.id,
       appointments: appointments.filter(
-        appointment => appointment.memberId === member.id,
+        appointment => appointment.memberId === member.id ,
       ),
     }));
+    // console.log(appointmentsMembers)
+    
     yield put(appointmentByMembersLoaded(appointmentsMembers));
     // Update main calendar
     addEventsToCalendar(currentDate, appointmentsMembers);

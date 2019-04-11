@@ -49,6 +49,12 @@ import {
   UPDATE_STATUS_APPOINTMENT_SUCCESS,
   UPDATE_STATUS_APPOINTMENT_ERROR,
   UPDATE_CALENDAR_INTERVAL,
+  CHECK_PHONE_ADD_CUSTOMER,
+  CHECK_PHONE_ADD_CUSTOMER_SUCCESS,
+  CHECK_PHONE_ADD_CUSTOMER_ERROR,
+  ADD_CUSTOMER,
+  ADD_CUSTOMER_SUCCESS,
+  ADD_CUSTOMER_ERROR
 } from './constants';
 
 /**
@@ -449,3 +455,46 @@ export function updateCalendarInterval() {
     type: UPDATE_CALENDAR_INTERVAL,
   };
 }
+
+
+/* Check phone number to add customer */
+export function checkPhoneNumberCustomer(phone) {
+  return {
+    type: CHECK_PHONE_ADD_CUSTOMER,
+    phone,
+  };
+}
+export function checkPhoneNumberCustomerSuccess(customer) {
+  return {
+    type: checkPhoneNumberCustomerSuccess,
+    customer,
+  };
+}
+export function checkPhoneNumberCustomerError(error) {
+  return {
+    type: checkPhoneNumberCustomerError,
+    error,
+  };
+}
+
+
+/* Add Customer */
+export function addCustomer(customer) {
+  return {
+    type: ADD_CUSTOMER,
+    customer,
+  };
+}
+export function addCustomerSuccess(customer) {
+  return {
+    type: ADD_CUSTOMER_SUCCESS,
+    customer,
+  };
+}
+export function addCustomerError(error) {
+  return {
+    type: ADD_CUSTOMER_ERROR,
+    error,
+  };
+}
+

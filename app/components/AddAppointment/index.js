@@ -5,6 +5,8 @@ import Popup from 'reactjs-popup';
 import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
 import axios from 'axios'
+
+
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
   padding: 0 !important;
@@ -259,6 +261,11 @@ class AddAppointment extends React.Component {
           isOpenAddingPopup: true,
         });
       } else {
+        console.log(result.data);
+        window.postMessage(JSON.stringify({
+          consumerId : result.data.data.user_id,
+          action : 'newAppointment'
+        }))
         this.setState({ error_phone: 'This phone number already exist !!!' })
         setTimeout(() => {
           this.setState({ error_phone: '' })
@@ -285,6 +292,12 @@ class AddAppointment extends React.Component {
       if (result.data.data === "{}") {
 
       } else {
+        console.log(result.data);
+        const id = result.data.data
+        window.postMessage(JSON.stringify({
+          consumerId : id,
+          action : 'newAppointment'
+        }))
         this.setState({ 
           first_name : '',
           last_name : '',
@@ -355,7 +368,7 @@ class AddAppointment extends React.Component {
                   type="number"
                 />
                 <div>
-                  <Button type="submit" primary>
+                  <Button id="submit-create-appointment" type="submit" primary>
                     Next
                   </Button>
                 </div>

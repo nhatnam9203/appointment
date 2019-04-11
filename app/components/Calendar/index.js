@@ -49,18 +49,16 @@ SignInWrapper.Button = styled.div`
 `;
 
 class Calendar extends React.Component {
-  // componentWillMount() {
-  //   const { loadWaitingAppointments } = this.props;
-  //   loadWaitingAppointments();
-  // }
+  componentWillMount() {
+    const { loadWaitingAppointments } = this.props;
+    loadWaitingAppointments();
+  }
 
   // FIXME: This is hard code for real-time calendar
   componentDidMount() {
     const { updateCalendarInterval } = this.props;
-    const { loadWaitingAppointments } = this.props;
     setInterval(() => {
       updateCalendarInterval();
-      loadWaitingAppointments();
     }, 5000);
   }
 

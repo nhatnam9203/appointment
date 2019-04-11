@@ -66,3 +66,11 @@ export const UPDATE_STATUS_APPOINTMENT_ERROR =
 // FIXME: This is hard code for real-time calendar
 export const UPDATE_CALENDAR_INTERVAL =
   'app/Appointment/UPDATE_STATUS_APPOINTMENT_ERROR';
+
+  export const CHECK_PHONE_ADD_CUSTOMER = 'app/Appointment/CHECK_PHONE_ADD_CUSTOMER';
+  export const CHECK_PHONE_ADD_CUSTOMER_SUCCESS = 'app/Appointment/CHECK_PHONE_ADD_CUSTOMER_SUCCESS';
+  export const CHECK_PHONE_ADD_CUSTOMER_ERROR = 'app/Appointment/CHECK_PHONE_ADD_CUSTOMER_ERROR';
+
+  export const ADD_CUSTOMER = 'app/Appointment/ADD_CUSTOMER';
+  export const ADD_CUSTOMER_SUCCESS = 'app/Appointment/ADD_CUSTOMER_SUCCESS';
+  export const ADD_CUSTOMER_ERROR = 'app/Appointment/ADD_CUSTOMER_ERROR';

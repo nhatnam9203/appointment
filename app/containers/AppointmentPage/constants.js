@@ -74,3 +74,6 @@ export const UPDATE_CALENDAR_INTERVAL =
   export const ADD_CUSTOMER = 'app/Appointment/ADD_CUSTOMER';
   export const ADD_CUSTOMER_SUCCESS = 'app/Appointment/ADD_CUSTOMER_SUCCESS';
   export const ADD_CUSTOMER_ERROR = 'app/Appointment/ADD_CUSTOMER_ERROR';
+
+  export const UPDATE_WAITING_APPOINTMENT = 'UPDATE_WAITING_APPOINTMENT';
+  

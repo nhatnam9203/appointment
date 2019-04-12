@@ -11,6 +11,7 @@
  */
 import moment from 'moment';
 import { fromJS } from 'immutable';
+import {difference} from 'lodash'
 
 import {
   SELECT_DAY,
@@ -34,6 +35,7 @@ import {
   CLOSE_ADDING_APPOINTMENT,
   CANCEL_APPOINTMENT_SUCCESS,
   UPDATE_STATUS_APPOINTMENT_SUCCESS,
+  UPDATE_WAITING_APPOINTMENT
 } from './constants';
 
 const initialCurrentDay = moment();
@@ -253,9 +255,46 @@ function appointmentReducer(state = initialState, action) {
         return [...arr];
       });
 
+      case UPDATE_WAITING_APPOINTMENT :
+        console.log(action.appointment);
+        console.log(state.getIn(['appointments','waiting']));
+
+        console.log(_.difference(action.appointment,state.getIn(['appointments','waiting'])));
+          return state.updateIn(['appointments','waiting'],arr=>{
+
+            return [...arr];
+          })
+
     default:
       return state;
   }
 }
+
+Array.prototype.diff = function(a) {
+  return this.filter(function(i) {return a.indexOf(i) < 0;});
+};
+
+function arr_diff (a1, a2) {
+
+  var a = [], diff = [];
+
+  for (var i = 0; i < a1.length; i++) {
+      a[a1[i]] = true;
+  }
+
+  for (var i = 0; i < a2.length; i++) {
+      if (a[a2[i]]) {
+          delete a[a2[i]];
+      } else {
+          a[a2[i]] = true;
+      }
+  }
+
+  for (var k in a) {
+      diff.push(k);
+  }
+  return diff;
+}
+
 
 export default appointmentReducer;

@@ -54,7 +54,8 @@ import {
   CHECK_PHONE_ADD_CUSTOMER_ERROR,
   ADD_CUSTOMER,
   ADD_CUSTOMER_SUCCESS,
-  ADD_CUSTOMER_ERROR
+  ADD_CUSTOMER_ERROR,
+  UPDATE_WAITING_APPOINTMENT,
 } from './constants';
 
 /**
@@ -497,4 +498,9 @@ export function addCustomerError(error) {
     error,
   };
 }
+
+export const updateWaitingAppointment = (appointment) => ({
+  type: UPDATE_WAITING_APPOINTMENT,
+  appointment
+})
 

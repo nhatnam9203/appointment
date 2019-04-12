@@ -8,6 +8,7 @@ import {
   loadWaitingAppointments,
   openAddingAppointment,
   updateCalendarInterval,
+  updateWaitingAppointment
 } from './actions';
 import {
   makeSelectWaitingAppointments,
@@ -19,6 +20,7 @@ export function mapDispatchToProps(dispatch) {
     loadWaitingAppointments: day => dispatch(loadWaitingAppointments(day)),
     openAddingAppointment: app => dispatch(openAddingAppointment(app)),
     updateCalendarInterval: app => dispatch(updateCalendarInterval(app)),
+    updateWaitingAppointment : appointment => dispatch(updateWaitingAppointment(appointment))
   };
 }
 

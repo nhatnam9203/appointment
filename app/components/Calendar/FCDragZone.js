@@ -36,12 +36,14 @@ function handleDrag() {
     revert: true,
     revertDuration: 0,
   });
+
 }
 
 class FCDragZone extends React.PureComponent {
   componentDidMount() {
     // setInterval(() => {
     $('#waiting-events > div').each(handleDrag);
+
     // }, 500);
   }
 

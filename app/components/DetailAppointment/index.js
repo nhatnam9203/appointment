@@ -328,6 +328,11 @@ class Appointment extends React.Component {
       confirmationModal: true,
     });
     console.log(this.props.appointment);
+    console.log(this.state.services);
+    const servicesUpdate = this.state.services.map(
+      service => `${service.id}@${service.duration}@${this.props.appointment.memberId}`,
+    );
+    console.log(servicesUpdate)
   }
 
   closeConfirmationModal() {
@@ -396,13 +401,7 @@ class Appointment extends React.Component {
         "Content-Type" : "application/json",
       }
     }).then(result=>{
-      if(result.data.codeStatus === 1){
-        window.postMessage(JSON.stringify({
-          appointmentId : id,
-          action : 'checkout'
-        }))
-        console.log(result.data);
-      }
+
     })
   }
 

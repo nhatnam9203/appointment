@@ -13,3 +13,7 @@ export const POST_MOVE_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/DragDrop
 export const POST_PUT_BACK_APPOINTMENT_API = `${API_BASE_URL}/appointments/back`;
 export const POST_CANCEL_APPOINTMENT_API = `${API_BASE_URL}/appointments/cancel`;
 export const POST_STATUS_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/Update`;
+export const POST_UPDATE_STATUS_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/UpdateStatus`;
+
+
+

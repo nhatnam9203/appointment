@@ -59,7 +59,7 @@ import {
   // POST_PUT_BACK_APPOINTMENT_API
   // POST_CANCEL_APPOINTMENT_API
   POST_STATUS_APPOINTMENT_API,
-  POST_UPDATE_APPOINTMENT_API
+  POST_UPDATE_APPOINTMENT_API,
 } from '../../../app-constants';
 
 // import { members as mockedMembers } from '../../assets/mocks/members';
@@ -244,7 +244,6 @@ export function* getAppointmentsByMembersAndDate() {
       headers,
       body: requestBody,
     });
-    // console.log(response);
     const appointments =
       response &&
       response.data &&
@@ -254,10 +253,9 @@ export function* getAppointmentsByMembersAndDate() {
     const appointmentsMembers = displayedMembers.map(member => ({
       memberId: member.id,
       appointments: appointments.filter(
-        appointment => appointment.memberId === member.id ,
+        appointment => appointment.memberId === member.id && appointment.status !== 'WAITING',
       ),
     }));
-    // console.log(appointmentsMembers)
     
     yield put(appointmentByMembersLoaded(appointmentsMembers));
     // Update main calendar
@@ -285,12 +283,30 @@ export function* assignAppointment(action) {
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
-    const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
-    const formData = new FormData();
-    formData.append('FromTime', appointment.start);
-    formData.append('staff_id', appointment.memberId);
-    formData.append('appointment_id', appointment.id);
-    const result = dragAppointment(requestURL.toString(), formData);
+    const {id,memberId,start,end} = appointment
+    const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
+    const result = drag_Appointment(requestURL.toString(),{
+      id,
+      Staff_id: memberId,
+      StoreId : 1,
+      FromTime : start,
+      ToTime : end,
+      total : 0,
+      duration : 0,
+      CheckinStatus:"CheckIn",
+      PaidStatus : true,
+      Status : 1,
+      CreateDate : new Date().toString().substring(0,15),
+      User_id : 8, 
+    })
+
+
+    // const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
+    // const formData = new FormData();
+    // formData.append('FromTime', appointment.start);
+    // formData.append('staff_id', appointment.memberId);
+    // formData.append('appointment_id', appointment.id);
+    // const result = dragAppointment(requestURL.toString(), formData);
     /* --------------------------------------------------------------- */
     /* --------------------------------------------------------------- */
     if (result) {
@@ -364,7 +380,24 @@ export function* putBackAppointment(action) {
     /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     yield delay(200);
-    const result = mockedPostAppointment;
+    // const result = mockedPostAppointment;
+    const {id,memberId,start,end} = action.appointment;
+    const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
+    const result = drag_Appointment(requestURL.toString(),{
+      id,
+      Staff_id: memberId,
+      StoreId : 1,
+      FromTime : start,
+      ToTime : end,
+      total : 0,
+      duration : 0,
+      CheckinStatus:"Waiting",
+      PaidStatus : true,
+      Status : 1,
+      CreateDate : new Date().toString().substring(0,15),
+      User_id : 8, 
+    })
+
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
 
@@ -612,3 +645,19 @@ async function dragAppointment(api, formData) {
     },
   });
 }
+
+async function drag_Appointment(api, data) {
+  return axios({
+    method: 'POST',
+    url: api,
+    data: data,
+    headers,
+    config: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type" : "application/json",
+      },
+    },
+  });
+}
+

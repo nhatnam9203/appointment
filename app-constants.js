@@ -14,6 +14,7 @@ export const POST_PUT_BACK_APPOINTMENT_API = `${API_BASE_URL}/appointments/back`
 export const POST_CANCEL_APPOINTMENT_API = `${API_BASE_URL}/appointments/cancel`;
 export const POST_STATUS_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/Update`;
 export const POST_UPDATE_STATUS_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/UpdateStatus`;
-
+export const POST_CHECK_PHONE_CUSTOMER = `${API_BASE_URL}/AppointmentV2/FindUserByPhone`;
+export const POST_DETAIL_APPOINTMENT = `${API_BASE_URL}/AppointmentV2`;
 
 

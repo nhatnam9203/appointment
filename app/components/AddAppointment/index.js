@@ -234,6 +234,24 @@ class AddAppointment extends React.Component {
     error_addApointment : '',
   };
 
+  async componentWillReceiveProps(nextProps){
+    if(nextProps.checkPhoneSuccess){
+      this.setState({
+        isOpenSearchingPopup: false,
+        isOpenAddingPopup: true,
+      });
+      if(nextProps.checkPhoneError){
+        this.setState({error_phone : 'This phone number already exist !!!'});
+        setTimeout(() => {
+          this.setState({
+            error_phone: '',
+          });
+          this.props.checkPhoneNumberCustomerError(false);
+        }, 3000);
+      }
+    } 
+  }
+
   closeAllModal() {
     this.setState({
       isOpenSearchingPopup: true,
@@ -241,42 +259,43 @@ class AddAppointment extends React.Component {
       phoneNumber: '',
     });
     const { closeAddingAppointment } = this.props;
+    this.props.checkPhoneNumberCustomerSuccess(false)
     closeAddingAppointment();
   }
 
   handleSubmitVerifyPhone(e) {
     e.preventDefault();
-    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/FindUserByPhone'
-    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
-    let formdt = new FormData();
-    formdt.append('phone', this.state.phoneNumber);
-    axios.post(api, formdt, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
-    }).then((result) => {
-      if (result.data.data === "{}") {
-        this.setState({
-          isOpenSearchingPopup: false,
-          isOpenAddingPopup: true,
-        });
-      } else {
-        console.log(result.data);
-        window.postMessage(JSON.stringify({
-          consumerId : result.data.data.user_id,
-          action : 'newAppointment'
-        }))
-        this.setState({ error_phone: 'This phone number already exist !!!' })
-        setTimeout(() => {
-          this.setState({ error_phone: '' })
-        }, 3000);
-      }
-    })
+    // const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/FindUserByPhone'
+    // let formdt = new FormData();
+    // formdt.append('phone', this.state.phoneNumber);
+
+    this.props.checkPhoneNumberCustomer(this.state.phoneNumber);
+    // axios.post(api, formdt, {
+    //   headers: {
+    //     Authorization: `Bearer ${token}`,
+    //   }
+    // }).then((result) => {
+    //   if (result.data.data === "{}") {
+    //     this.setState({
+    //       isOpenSearchingPopup: false,
+    //       isOpenAddingPopup: true,
+    //     });
+    //   } else {
+    //     console.log(result.data);
+    //     window.postMessage(JSON.stringify({
+    //       consumerId : result.data.data.user_id,
+    //       action : 'newAppointment'
+    //     }))
+    //     this.setState({ error_phone: 'This phone number already exist !!!' })
+    //     setTimeout(() => {
+    //       this.setState({ error_phone: '' })
+    //     }, 3000);
+    //   }
+    // })
   }
   handleSubmitAppointment = () => {
     const {first_name,last_name,phoneNumber} = this.state;
     const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/AddNewUser'
-    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3QxQGdtYWlsLmNvbSIsIm1lcmNoYW50SWQiOiIzIiwiU3RvcmVJZCI6IjEiLCJqdGkiOiJlMjE2ZTIxMS0wYjM1LTRiNmMtOGVjYS03MjBkNzA2Y2E4MzgiLCJleHAiOjE1NTQ4ODgxNjcsImlzcyI6IlRlc3QuY29tIiwiYXVkIjoiVGVzdC5jb20ifQ.3XdOtqgl8zCKmI37LwMgUDCnnX90JiYCn1-Zn5Bkw2A';
     let formdt = new FormData();
     formdt.append('first_name',first_name);
     formdt.append('last_name',last_name);
@@ -343,6 +362,7 @@ class AddAppointment extends React.Component {
  
 
   render() {
+    console.log(this.props.checkPhoneError);
     const { isOpenSearchingPopup, isOpenAddingPopup, notes, error_phone,success_addApointment } = this.state;
     const { appointment } = this.props;
     if (!appointment) return '';
@@ -356,7 +376,7 @@ class AddAppointment extends React.Component {
             <SearchingWrapper.Close onClick={() => this.closeAllModal()}>
               <FaTimesCircle />
             </SearchingWrapper.Close>
-            <SearchingWrapper.Header backgroundColor="#00b4f7">
+            <SearchingWrapper.Header backgroundColor="#0071C5">
               Add Appointment
             </SearchingWrapper.Header>
             <SearchingWrapper.Body>Enter phone number</SearchingWrapper.Body>

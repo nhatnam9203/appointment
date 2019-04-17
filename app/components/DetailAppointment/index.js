@@ -11,7 +11,8 @@ const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
   padding: 0 !important;
   border: none !important;
-  overflow: hidden;
+  overflow-y: scroll;
+  height: 450px;
 `;
 
 const AppPopupWrapper = styled.div`
@@ -20,7 +21,7 @@ const AppPopupWrapper = styled.div`
 
 AppPopupWrapper.Header = styled.div`
   height: 3rem;
-  font-size: 20px;
+  font-size: 26px;
   font-weight: bold;
   background: ${props => props.backgroundColor};
   color: #ffffff;
@@ -309,7 +310,6 @@ class Appointment extends React.Component {
     return total;
   }
   
-
   closeModal() {
     const { deselectAppointment } = this.props;
     deselectAppointment();
@@ -317,6 +317,7 @@ class Appointment extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.appointment) {
+      // axios.post('https://hp-api-dev.azurewebsites.net/api/AppointmentV2/id',)
       this.setState({
         services: nextProps.appointment.options,
       });
@@ -327,12 +328,6 @@ class Appointment extends React.Component {
     this.setState({
       confirmationModal: true,
     });
-    console.log(this.props.appointment);
-    console.log(this.state.services);
-    const servicesUpdate = this.state.services.map(
-      service => `${service.id}@${service.duration}@${this.props.appointment.memberId}`,
-    );
-    console.log(servicesUpdate)
   }
 
   closeConfirmationModal() {
@@ -370,38 +365,31 @@ class Appointment extends React.Component {
     nextStatus(appointment.id, servicesUpdate);
   }
 
-  updateStatusPaid=(idAppointmet)=>{
+  updateStatusPaid=(idAppointment)=>{
     window.postMessage(JSON.stringify({
-      appointmentId : idAppointmet,
+      appointmentId : idAppointment,
       action : 'checkout'
-    }))
+    }));
+    console.log('appointment')
+    console.log(this.props.appointment);
+    console.log('services');
+    const {appointment} = this.props;
+    const { services } = this.state;
+    const servicesUpdate = services.map(
+      service => `${service.id}@${service.duration}@${appointment.memberId}`,
+    );
+    console.log(servicesUpdate)
   }
+
 
   updateStatus(status,servicesUpdate){
     const {appointment} = this.props;
-    const {id,memberId,end,start} = appointment;
-    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/Update'
-    axios.post(api,{
-      id,
-      Staff_id: memberId,
-      StoreId : 1,
-      FromTime : start,
-      ToTime : end,
-      total : this.getTotalPrice(),
-      duration : this.getTotalDuration(),
-      CheckinStatus:status,
-      PaidStatus : true,
-      Status : 1,
-      CreateDate : new Date().toString().substring(0,15),
+    this.props.updateAppointment({
+      appointment,
+      total:this.getTotalPrice(),
+      duration:this.getTotalDuration(),
       BookingServices2 : servicesUpdate,
-      User_id : 8, 
-    },{
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type" : "application/json",
-      }
-    }).then(result=>{
-
+      status
     })
   }
 

@@ -19,6 +19,9 @@ import {
   CANCEL_APPOINTMENT,
   UPDATE_STATUS_APPOINTMENT_SUCCESS,
   UPDATE_CALENDAR_INTERVAL,
+  UPDATE_APPOINTMENT_STATUS,
+  ADD_CUSTOMER,
+  CHECK_PHONE_ADD_CUSTOMER,
 } from './constants';
 import {
   selectDay,
@@ -42,6 +45,14 @@ import {
   appointmentCancellingError,
   appointmentUpdatedStatus,
   appointmentUpdatingStatusError,
+  updateAppointmentError,
+  updateAppointmentSuccess,
+  addCustomer,
+  addCustomerSuccess,
+  addCustomerError,
+  checkPhoneNumberCustomer,
+  checkPhoneNumberCustomerSuccess,
+  checkPhoneNumberCustomerError,
 } from './actions';
 import {
   makeCurrentDay,
@@ -60,6 +71,8 @@ import {
   // POST_CANCEL_APPOINTMENT_API
   POST_STATUS_APPOINTMENT_API,
   POST_UPDATE_APPOINTMENT_API,
+  POST_CHECK_PHONE_CUSTOMER,
+  POST_DETAIL_APPOINTMENT
 } from '../../../app-constants';
 
 // import { members as mockedMembers } from '../../assets/mocks/members';
@@ -244,6 +257,9 @@ export function* getAppointmentsByMembersAndDate() {
       headers,
       body: requestBody,
     });
+
+    console.log(response)
+
     const appointments =
       response &&
       response.data &&
@@ -256,7 +272,7 @@ export function* getAppointmentsByMembersAndDate() {
         appointment => appointment.memberId === member.id && appointment.status !== 'WAITING',
       ),
     }));
-    
+
     yield put(appointmentByMembersLoaded(appointmentsMembers));
     // Update main calendar
     addEventsToCalendar(currentDate, appointmentsMembers);
@@ -283,21 +299,24 @@ export function* assignAppointment(action) {
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
-    const {id,memberId,start,end} = appointment
+    const { id, memberId, start, end } = appointment
+    let formdt = new FormData();
+    formdt.append('id', id)
+    const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    const result = drag_Appointment(requestURL.toString(),{
+    const result = drag_Appointment(requestURL.toString(), {
       id,
       Staff_id: memberId,
-      StoreId : 1,
-      FromTime : start,
-      ToTime : end,
-      total : 0,
-      duration : 0,
-      CheckinStatus:"CheckIn",
-      PaidStatus : true,
-      Status : 1,
-      CreateDate : new Date().toString().substring(0,15),
-      User_id : 8, 
+      StoreId: 1,
+      FromTime: start,
+      ToTime: end,
+      total: 0,
+      duration: 0,
+      CheckinStatus: "CheckIn",
+      PaidStatus: true,
+      Status: 1,
+      CreateDate: new Date().toString().substring(0, 15),
+      User_id: kq.data.data.user_id,
     })
 
 
@@ -362,6 +381,9 @@ export function* moveAppointment(action) {
     formData.append('FromTime', appointment.start);
     formData.append('staff_id', appointment.memberId);
     formData.append('appointment_id', appointment.id);
+    console.log(formData.get('appointment_id'));
+    console.log(formData.get('staff_id'));
+    console.log(formData.get('FromTime'));
     const result = dragAppointment(requestURL.toString(), formData);
     /* --------------------------------------------------------------- */
     /* --------------------------------------------------------------- */
@@ -381,21 +403,21 @@ export function* putBackAppointment(action) {
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     yield delay(200);
     // const result = mockedPostAppointment;
-    const {id,memberId,start,end} = action.appointment;
+    const { id, memberId, start, end } = action.appointment;
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    const result = drag_Appointment(requestURL.toString(),{
+    const result = drag_Appointment(requestURL.toString(), {
       id,
       Staff_id: memberId,
-      StoreId : 1,
-      FromTime : start,
-      ToTime : end,
-      total : 0,
-      duration : 0,
-      CheckinStatus:"Waiting",
-      PaidStatus : true,
-      Status : 1,
-      CreateDate : new Date().toString().substring(0,15),
-      User_id : 8, 
+      StoreId: 1,
+      FromTime: start,
+      ToTime: end,
+      total: 0,
+      duration: 0,
+      CheckinStatus: "Waiting",
+      PaidStatus: true,
+      Status: 1,
+      CreateDate: new Date().toString().substring(0, 15),
+      User_id: 109,
     })
 
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
@@ -548,6 +570,75 @@ export function* updateStatusAppointment(action) {
   }
 }
 
+export function* upddateAppointment(action) {
+  try {
+    const { appointment, total, duration, BookingServices2, status } = action.appointment;
+    const { memberId, start, end, id } = appointment;
+    let formdt = new FormData();
+    formdt.append('id', id)
+    const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
+    const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
+    const result = update_Appointment(requestURL.toString(), {
+      id,
+      Staff_id: memberId,
+      StoreId: 1,
+      FromTime: start,
+      ToTime: end,
+      total: total,
+      duration: duration,
+      CheckinStatus: status,
+      PaidStatus: true,
+      Status: 1,
+      CreateDate: new Date().toString().substring(0, 15),
+      BookingServices2: BookingServices2,
+      User_id: kq.data.data.user_id,
+    });
+    if (result) {
+      yield put(updateAppointmentSuccess(result))
+    } else {
+      yield put(updateAppointmentError(error))
+    }
+  }
+  catch (error) {
+    yield put(updateAppointmentError(error))
+  }
+}
+
+export function* addNewCustomer(action) {
+  try {
+    console.log(action.customer)
+  } catch (error) {
+    yield put(addCustomerError(error))
+  }
+}
+
+export function* checkPhoneCustomer(action) {
+  try {
+    let formdt = new FormData();
+    formdt.append('phone', action.phone);
+    const result = yield axios.post(POST_CHECK_PHONE_CUSTOMER, formdt, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    if (result.data.data === "{}") {
+      yield put(checkPhoneNumberCustomerSuccess(true))
+    } else {
+      window.postMessage(JSON.stringify({
+        consumerId: result.data.data.user_id,
+        action: 'newAppointment'
+      }));
+      yield put(checkPhoneNumberCustomerError(true))
+    }
+  } catch (error) {
+    yield put(checkPhoneNumberCustomerError(error))
+  }
+}
+
+
+
+
+
 /* **************************** Subroutines ******************************** */
 
 export function* selectDayAndWeek(action) {
@@ -566,6 +657,7 @@ export function* getDisplayedMembers() {
 export function* selectDayOnCalendar() {
   yield takeLatest(SELECT_DAY_CALENDAR, selectDayAndWeek);
 }
+
 
 export function* membersData() {
   yield takeLatest(LOAD_MEMBERS, getMembers);
@@ -614,6 +706,16 @@ export function* cancelAppointmentData() {
   yield takeLatest(CANCEL_APPOINTMENT, cancelAppointment);
 }
 
+export function* updateAppointmentStatus() {
+  yield takeLatest(UPDATE_APPOINTMENT_STATUS, upddateAppointment)
+}
+export function* add_Customer() {
+  yield takeLatest(ADD_CUSTOMER, addNewCustomer)
+}
+export function* check_Phone() {
+  yield takeLatest(CHECK_PHONE_ADD_CUSTOMER, checkPhoneCustomer)
+}
+
 /**
  * Root saga manages watcher lifecycle
  */
@@ -629,6 +731,10 @@ export default function* root() {
     fork(putBackAppointmentData),
     fork(updateStatusAppointmentData),
     fork(cancelAppointmentData),
+    fork(updateAppointmentStatus),
+    fork(add_Customer),
+    fork(check_Phone),
+
   ]);
 }
 
@@ -655,9 +761,42 @@ async function drag_Appointment(api, data) {
     config: {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type" : "application/json",
+        "Content-Type": "application/json",
       },
     },
   });
 }
+
+
+async function update_Appointment(api, data) {
+  return axios({
+    method: 'POST',
+    url: api,
+    data: data,
+    headers,
+    config: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  });
+}
+
+async function detail_Appointment(api, data) {
+  return axios({
+    method: 'POST',
+    url: api,
+    data: data,
+    headers,
+    config: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    },
+  });
+}
+
+
 

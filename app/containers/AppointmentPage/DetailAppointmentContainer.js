@@ -9,6 +9,7 @@ import {
   cancelAppointment,
   deselectAppointment,
   updateStatusAppointment,
+  updateAppointment
 } from './actions';
 
 export function mapDispatchToProps(dispatch) {
@@ -17,6 +18,9 @@ export function mapDispatchToProps(dispatch) {
     cancelAppointment: id => dispatch(cancelAppointment(id)),
     nextStatus: (id, services) =>
       dispatch(updateStatusAppointment(id, services)),
+    updateAppointment:(appointment)=>{
+      dispatch(updateAppointment(appointment))
+    }
   };
 }
 

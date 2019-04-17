@@ -56,6 +56,9 @@ import {
   ADD_CUSTOMER_SUCCESS,
   ADD_CUSTOMER_ERROR,
   UPDATE_WAITING_APPOINTMENT,
+  UPDATE_APPOINTMENT_STATUS,
+  UPDATE_APPOINTMENT_STATUS_SUCCESS,
+  UPDATE_APPOINTMENT_STATUS_ERROR,
 } from './constants';
 
 /**
@@ -465,15 +468,15 @@ export function checkPhoneNumberCustomer(phone) {
     phone,
   };
 }
-export function checkPhoneNumberCustomerSuccess(customer) {
+export function checkPhoneNumberCustomerSuccess(phone) {
   return {
-    type: checkPhoneNumberCustomerSuccess,
-    customer,
+    type: CHECK_PHONE_ADD_CUSTOMER_SUCCESS,
+    phone,
   };
 }
 export function checkPhoneNumberCustomerError(error) {
   return {
-    type: checkPhoneNumberCustomerError,
+    type: CHECK_PHONE_ADD_CUSTOMER_ERROR,
     error,
   };
 }
@@ -502,5 +505,18 @@ export function addCustomerError(error) {
 export const updateWaitingAppointment = (appointment) => ({
   type: UPDATE_WAITING_APPOINTMENT,
   appointment
+});
+
+export const updateAppointment = (appointment) => ({
+  type: UPDATE_APPOINTMENT_STATUS,
+  appointment
+});
+export const updateAppointmentSuccess = (appointment) => ({
+  type: UPDATE_APPOINTMENT_STATUS_SUCCESS,
+  appointment
+});
+export const updateAppointmentError = (error) => ({
+  type: UPDATE_APPOINTMENT_STATUS_ERROR,
+  error
 })
 

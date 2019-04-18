@@ -369,7 +369,6 @@ class Appointment extends React.Component {
       appointmentId: idAppointment,
       action: 'checkout'
     }));
-
   }
 
 

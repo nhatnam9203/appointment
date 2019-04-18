@@ -297,7 +297,7 @@ export function* assignAppointment(action) {
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
-    const { id, memberId, start, end } = appointment
+    const { id, memberId, start, end } = appointment;
     let formdt = new FormData();
     formdt.append('id', id)
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
@@ -307,7 +307,7 @@ export function* assignAppointment(action) {
       Staff_id: memberId,
       StoreId: 1,
       FromTime: start,
-      ToTime: end,
+      ToTime: moment(end).add(60,'minutes').format().substr(0,19),
       total: 0,
       duration: 0,
       CheckinStatus: "CheckIn",
@@ -315,7 +315,8 @@ export function* assignAppointment(action) {
       Status: 1,
       CreateDate: new Date().toString().substring(0, 15),
       User_id: kq.data.data.user_id,
-    })
+    });
+    
 
 
     // const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
@@ -363,7 +364,7 @@ export function* moveAppointment(action) {
     end: action.newEndTime,
     memberId: assignedMember.id,
   };
-  
+
   let formdt = new FormData();
   formdt.append('id', movedAppointment.id);
   var start = movedAppointment.start;
@@ -424,7 +425,27 @@ export function* putBackAppointment(action) {
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     yield delay(200);
     // const result = mockedPostAppointment;
+    
     const { id, memberId, start, end } = action.appointment;
+    let formdt = new FormData();
+    formdt.append('id', id)
+    const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
+    // const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
+    // const result = drag_Appointment(requestURL.toString(), {
+    //   id,
+    //   Staff_id: memberId,
+    //   StoreId: 1,
+    //   FromTime: start,
+    //   ToTime: end,
+    //   total: 0,
+    //   duration: 0,
+    //   CheckinStatus: "CheckIn",
+    //   PaidStatus: true,
+    //   Status: 1,
+    //   CreateDate: new Date().toString().substring(0, 15),
+    //   User_id: kq.data.data.user_id,
+    // })
+
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = drag_Appointment(requestURL.toString(), {
       id,
@@ -438,7 +459,7 @@ export function* putBackAppointment(action) {
       PaidStatus: true,
       Status: 1,
       CreateDate: new Date().toString().substring(0, 15),
-      User_id: 109,
+      User_id: kq.data.data.user_id,
     })
 
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */

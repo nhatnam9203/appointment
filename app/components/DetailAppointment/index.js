@@ -7,6 +7,8 @@ import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
 import axios from 'axios'
 
+const token = location.search.replace('?token=', '');
+
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
   padding: 0 !important;
@@ -204,8 +206,6 @@ ConfirmationWrapper.Footer = styled(AppPopupWrapper.Footer)`
 `;
 
 
-const token = location.search.replace('?token=', '');
-
 class Appointment extends React.Component {
   state = {
     noteValue: '',
@@ -309,7 +309,7 @@ class Appointment extends React.Component {
     });
     return total;
   }
-  
+
   closeModal() {
     const { deselectAppointment } = this.props;
     deselectAppointment();
@@ -317,7 +317,6 @@ class Appointment extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.appointment) {
-      // axios.post('https://hp-api-dev.azurewebsites.net/api/AppointmentV2/id',)
       this.setState({
         services: nextProps.appointment.options,
       });
@@ -339,12 +338,12 @@ class Appointment extends React.Component {
   confirmCancelAppointment() {
     this.closeConfirmationModal();
     const { appointment, cancelAppointment } = this.props;
-    const {services} = this.state;
+    const { services } = this.state;
     cancelAppointment(appointment.id);
     const servicesUpdate = services.map(
       service => `${service.id}@${service.duration}@${appointment.memberId}`,
     );
-    this.updateStatus("Waiting",servicesUpdate)
+    this.updateStatus("Waiting", servicesUpdate)
   }
 
   nextStatus() {
@@ -353,42 +352,34 @@ class Appointment extends React.Component {
     const servicesUpdate = services.map(
       service => `${service.id}@${service.duration}@${appointment.memberId}`,
     );
-    if(appointment.status === "CONFIRMED"){
-      this.updateStatus("CheckIn",servicesUpdate)
+    if (appointment.status === "CONFIRMED") {
+      this.updateStatus("CheckIn", servicesUpdate)
     }
-    if(appointment.status === "ASSIGNED"){
-      this.updateStatus("Confirm",servicesUpdate)
+    if (appointment.status === "ASSIGNED") {
+      this.updateStatus("Confirm", servicesUpdate)
     }
-    if(appointment.status === "CHECKED_IN"){
+    if (appointment.status === "CHECKED_IN") {
       this.updateStatusPaid(appointment.id);
     }
     nextStatus(appointment.id, servicesUpdate);
   }
 
-  updateStatusPaid=(idAppointment)=>{
+  updateStatusPaid = (idAppointment) => {
     window.postMessage(JSON.stringify({
-      appointmentId : idAppointment,
-      action : 'checkout'
+      appointmentId: idAppointment,
+      action: 'checkout'
     }));
-    console.log('appointment')
-    console.log(this.props.appointment);
-    console.log('services');
-    const {appointment} = this.props;
-    const { services } = this.state;
-    const servicesUpdate = services.map(
-      service => `${service.id}@${service.duration}@${appointment.memberId}`,
-    );
-    console.log(servicesUpdate)
+
   }
 
 
-  updateStatus(status,servicesUpdate){
-    const {appointment} = this.props;
+  updateStatus(status, servicesUpdate) {
+    const { appointment } = this.props;
     this.props.updateAppointment({
       appointment,
-      total:this.getTotalPrice(),
-      duration:this.getTotalDuration(),
-      BookingServices2 : servicesUpdate,
+      total: this.getTotalPrice(),
+      duration: this.getTotalDuration(),
+      BookingServices2: servicesUpdate,
       status
     })
   }
@@ -502,7 +493,7 @@ class Appointment extends React.Component {
               Duration (ms)
             </th>
             <th style={{ textAlign: 'center' }}>Price ($)</th>
-          </tr>
+          </tr> 
         </thead>
         <tbody>{services.map((s, i) => this.renderService(s, i))}</tbody>
       </table>

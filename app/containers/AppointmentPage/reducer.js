@@ -270,7 +270,6 @@ function appointmentReducer(state = initialState, action) {
       return state.set('checkPhoneNumber_success',action.phone);
 
       case CHECK_PHONE_ADD_CUSTOMER_ERROR : 
-      console.log(action.error)
           return state.set('checkPhoneNumber_error',action.error);
 
     default:

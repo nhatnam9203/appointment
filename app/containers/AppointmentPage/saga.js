@@ -258,8 +258,6 @@ export function* getAppointmentsByMembersAndDate() {
       body: requestBody,
     });
 
-    console.log(response)
-
     const appointments =
       response &&
       response.data &&
@@ -365,7 +363,14 @@ export function* moveAppointment(action) {
     end: action.newEndTime,
     memberId: assignedMember.id,
   };
-
+  
+  let formdt = new FormData();
+  formdt.append('id', movedAppointment.id);
+  var start = movedAppointment.start;
+  var end = movedAppointment.end;
+  var newTime = (Date.parse(end)-Date.parse(start));
+  var minutes = Math.floor(newTime / 60000);
+  var ToTime = moment(appointment.start).add(minutes,'minutes').format();
   try {
     /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
@@ -376,17 +381,33 @@ export function* moveAppointment(action) {
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
-    const requestURL = new URL(POST_MOVE_APPOINTMENT_API);
-    const formData = new FormData();
-    formData.append('FromTime', appointment.start);
-    formData.append('staff_id', appointment.memberId);
-    formData.append('appointment_id', appointment.id);
-    console.log(formData.get('appointment_id'));
-    console.log(formData.get('staff_id'));
-    console.log(formData.get('FromTime'));
-    const result = dragAppointment(requestURL.toString(), formData);
+    // const requestURL = new URL(POST_MOVE_APPOINTMENT_API);
+    // const formData = new FormData();
+    // formData.append('FromTime', appointment.start);
+    // formData.append('staff_id', appointment.memberId);
+    // formData.append('appointment_id', appointment.id);
+    // const result = dragAppointment(requestURL.toString(), formData);
     /* --------------------------------------------------------------- */
     /* --------------------------------------------------------------- */
+
+    const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
+    const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
+    const result = update_Appointment(requestURL.toString(), {
+      id : appointment.id,
+      Staff_id: appointment.memberId,
+      StoreId: 1,
+      FromTime: appointment.start,
+      ToTime: ToTime.substr(0,19),
+      total: kq.data.data.total,
+      duration: kq.data.data.duration,
+      CheckinStatus: kq.data.data.checkinStatus,
+      PaidStatus: true,
+      Status: 1,
+      CreateDate: new Date().toString().substring(0, 15),
+      BookingServices2: kq.data.data.bookingServices2,
+      User_id: kq.data.data.user_id,
+    });
+
     if (result) {
       yield put(appointmentMoved(appointment));
     } else {
@@ -575,7 +596,8 @@ export function* upddateAppointment(action) {
     const { appointment, total, duration, BookingServices2, status } = action.appointment;
     const { memberId, start, end, id } = appointment;
     let formdt = new FormData();
-    formdt.append('id', id)
+    formdt.append('id', id);
+    var newDate = moment(end).add(duration,'minutes').format();
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = update_Appointment(requestURL.toString(), {
@@ -583,7 +605,7 @@ export function* upddateAppointment(action) {
       Staff_id: memberId,
       StoreId: 1,
       FromTime: start,
-      ToTime: end,
+      ToTime: newDate.substr(0,19),
       total: total,
       duration: duration,
       CheckinStatus: status,
@@ -628,7 +650,7 @@ export function* checkPhoneCustomer(action) {
         consumerId: result.data.data.user_id,
         action: 'newAppointment'
       }));
-      yield put(checkPhoneNumberCustomerError(true))
+      yield put(checkPhoneNumberCustomer({error : 'This phone number already exist!!!'}))
     }
   } catch (error) {
     yield put(checkPhoneNumberCustomerError(error))

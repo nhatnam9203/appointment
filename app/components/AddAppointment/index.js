@@ -234,23 +234,25 @@ class AddAppointment extends React.Component {
     error_addApointment : '',
   };
 
-  async componentWillReceiveProps(nextProps){
-    if(nextProps.checkPhoneSuccess){
-      this.setState({
-        isOpenSearchingPopup: false,
-        isOpenAddingPopup: true,
-      });
-      if(nextProps.checkPhoneError){
-        this.setState({error_phone : 'This phone number already exist !!!'});
-        setTimeout(() => {
-          this.setState({
-            error_phone: '',
-          });
-          this.props.checkPhoneNumberCustomerError(false);
-        }, 3000);
-      }
-    } 
-  }
+  // async componentWillReceiveProps(nextProps){
+  //   console.log(nextProps.checkPhoneSuccess)
+  //   if(nextProps.checkPhoneSuccess === true){
+  //     this.setState({
+  //       isOpenSearchingPopup: false,
+  //       isOpenAddingPopup: true,
+  //     });
+  //     // if(nextProps.checkPhoneError){
+  //     //   console.log(nextProps.checkPhoneError)
+  //     //   // this.setState({error_phone : 'This phone number already exist !!!'});
+  //     //   // setTimeout(() => {
+  //     //   //   this.setState({
+  //     //   //     error_phone: '',
+  //     //   //   });
+  //     //   //   this.props.checkPhoneNumberCustomerError(false);
+  //     //   // }, 3000);
+  //     // }
+  //   } 
+  // }
 
   closeAllModal() {
     this.setState({
@@ -259,39 +261,38 @@ class AddAppointment extends React.Component {
       phoneNumber: '',
     });
     const { closeAddingAppointment } = this.props;
-    this.props.checkPhoneNumberCustomerSuccess(false)
+    // this.props.checkPhoneNumberCustomerSuccess(false)
     closeAddingAppointment();
   }
 
   handleSubmitVerifyPhone(e) {
     e.preventDefault();
-    // const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/FindUserByPhone'
-    // let formdt = new FormData();
-    // formdt.append('phone', this.state.phoneNumber);
+    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/FindUserByPhone'
+    let formdt = new FormData();
+    formdt.append('phone', this.state.phoneNumber);
 
-    this.props.checkPhoneNumberCustomer(this.state.phoneNumber);
-    // axios.post(api, formdt, {
-    //   headers: {
-    //     Authorization: `Bearer ${token}`,
-    //   }
-    // }).then((result) => {
-    //   if (result.data.data === "{}") {
-    //     this.setState({
-    //       isOpenSearchingPopup: false,
-    //       isOpenAddingPopup: true,
-    //     });
-    //   } else {
-    //     console.log(result.data);
-    //     window.postMessage(JSON.stringify({
-    //       consumerId : result.data.data.user_id,
-    //       action : 'newAppointment'
-    //     }))
-    //     this.setState({ error_phone: 'This phone number already exist !!!' })
-    //     setTimeout(() => {
-    //       this.setState({ error_phone: '' })
-    //     }, 3000);
-    //   }
-    // })
+    // this.props.checkPhoneNumberCustomer(this.state.phoneNumber);
+    axios.post(api, formdt, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    }).then((result) => {
+      if (result.data.data === "{}") {
+        this.setState({
+          isOpenSearchingPopup: false,
+          isOpenAddingPopup: true,
+        });
+      } else {
+        window.postMessage(JSON.stringify({
+          consumerId : result.data.data.user_id,
+          action : 'newAppointment'
+        }))
+        this.setState({ error_phone: 'This phone number already exist !!!' })
+        setTimeout(() => {
+          this.setState({ error_phone: '' })
+        }, 3000);
+      }
+    })
   }
   handleSubmitAppointment = () => {
     const {first_name,last_name,phoneNumber} = this.state;
@@ -359,10 +360,8 @@ class AddAppointment extends React.Component {
     </NoteInformation>
   );
 
- 
 
   render() {
-    console.log(this.props.checkPhoneError);
     const { isOpenSearchingPopup, isOpenAddingPopup, notes, error_phone,success_addApointment } = this.state;
     const { appointment } = this.props;
     if (!appointment) return '';

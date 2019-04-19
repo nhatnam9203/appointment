@@ -7,10 +7,10 @@ import 'jquery-ui';
 const DragZoneWrapper = styled.div`
   height: calc(100vh - 4rem - 4rem - 4rem);
   //overflow: hidden;
-
   #waiting-events {
     height: 100%;
     overflow: scroll;
+    -webkit-overflow-scrolling: touch;
   }
 `;
 

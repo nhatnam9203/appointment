@@ -61,7 +61,6 @@ class Calendar extends React.Component {
   // FIXME: This is hard code for real-time calendar
   componentDidMount() {
     const { updateCalendarInterval } = this.props;
-    // console.log(this.props.waitingAppointments);
     setInterval(() => {
       updateCalendarInterval();
         this.checkWaiting5s(this.props.waitingAppointments)
@@ -76,7 +75,12 @@ class Calendar extends React.Component {
       }
     }).then(result => {
       const WaitingList = result.data.data;
-      if(WaitingList.length > waitingAppointments.length){
+      if(waitingAppointments){
+        if((WaitingList.length > waitingAppointments.length)){
+          this.props.loadWaitingAppointments();
+        }
+      }
+      if(!waitingAppointments){
         this.props.loadWaitingAppointments();
       }
     })

@@ -72,7 +72,8 @@ import {
   POST_STATUS_APPOINTMENT_API,
   POST_UPDATE_APPOINTMENT_API,
   POST_CHECK_PHONE_CUSTOMER,
-  POST_DETAIL_APPOINTMENT
+  POST_DETAIL_APPOINTMENT,
+  POST_ADD_CUSTOMER
 } from '../../../app-constants';
 
 // import { members as mockedMembers } from '../../assets/mocks/members';
@@ -230,7 +231,6 @@ export function* getAppointmentsByMembersAndDate() {
   const apiDateQuery =
     currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
   const apiMemberIdsQuery = displayedMembers.map(member => member.id);
-
   try {
     /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
@@ -307,7 +307,7 @@ export function* assignAppointment(action) {
       Staff_id: memberId,
       StoreId: 1,
       FromTime: start,
-      ToTime: moment(end).add(60,'minutes').format().substr(0,19),
+      ToTime: moment(end).add(60, 'minutes').format().substr(0, 19),
       total: 0,
       duration: 0,
       CheckinStatus: "CheckIn",
@@ -316,7 +316,7 @@ export function* assignAppointment(action) {
       CreateDate: new Date().toString().substring(0, 15),
       User_id: kq.data.data.user_id,
     });
-    
+
 
 
     // const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
@@ -369,9 +369,9 @@ export function* moveAppointment(action) {
   formdt.append('id', movedAppointment.id);
   var start = movedAppointment.start;
   var end = movedAppointment.end;
-  var newTime = (Date.parse(end)-Date.parse(start));
+  var newTime = (Date.parse(end) - Date.parse(start));
   var minutes = Math.floor(newTime / 60000);
-  var ToTime = moment(appointment.start).add(minutes,'minutes').format();
+  var ToTime = moment(appointment.start).add(minutes, 'minutes').format();
   try {
     /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
@@ -394,11 +394,11 @@ export function* moveAppointment(action) {
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = update_Appointment(requestURL.toString(), {
-      id : appointment.id,
+      id: appointment.id,
       Staff_id: appointment.memberId,
       StoreId: 1,
       FromTime: appointment.start,
-      ToTime: ToTime.substr(0,19),
+      ToTime: ToTime.substr(0, 19),
       total: kq.data.data.total,
       duration: kq.data.data.duration,
       CheckinStatus: kq.data.data.checkinStatus,
@@ -425,27 +425,11 @@ export function* putBackAppointment(action) {
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     yield delay(200);
     // const result = mockedPostAppointment;
-    
+
     const { id, memberId, start, end } = action.appointment;
     let formdt = new FormData();
     formdt.append('id', id)
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
-    // const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    // const result = drag_Appointment(requestURL.toString(), {
-    //   id,
-    //   Staff_id: memberId,
-    //   StoreId: 1,
-    //   FromTime: start,
-    //   ToTime: end,
-    //   total: 0,
-    //   duration: 0,
-    //   CheckinStatus: "CheckIn",
-    //   PaidStatus: true,
-    //   Status: 1,
-    //   CreateDate: new Date().toString().substring(0, 15),
-    //   User_id: kq.data.data.user_id,
-    // })
-
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = drag_Appointment(requestURL.toString(), {
       id,
@@ -618,7 +602,7 @@ export function* upddateAppointment(action) {
     const { memberId, start, end, id } = appointment;
     let formdt = new FormData();
     formdt.append('id', id);
-    var newDate = moment(end).add(duration,'minutes').format();
+    var newDate = moment(end).add(duration, 'minutes').format();
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = update_Appointment(requestURL.toString(), {
@@ -626,7 +610,7 @@ export function* upddateAppointment(action) {
       Staff_id: memberId,
       StoreId: 1,
       FromTime: start,
-      ToTime: newDate.substr(0,19),
+      ToTime: newDate.substr(0, 19),
       total: total,
       duration: duration,
       CheckinStatus: status,
@@ -649,7 +633,26 @@ export function* upddateAppointment(action) {
 
 export function* addNewCustomer(action) {
   try {
-    console.log(action.customer)
+    const { first_name, last_name, phoneNumber } = action.customer;
+    const result = yield axios.post(POST_ADD_CUSTOMER, {
+      first_name, last_name, phone: phoneNumber
+    }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      }
+    );
+    if (result.data.codeStatus === 1) {
+      const id = result.data.data
+      window.postMessage(JSON.stringify({
+        consumerId: id,
+        action: 'newAppointment'
+      }))
+      yield put(addCustomerSuccess(true))
+    } else {
+      yield put(addCustomerSuccess(true))
+    }
   } catch (error) {
     yield put(addCustomerError(error))
   }
@@ -671,7 +674,7 @@ export function* checkPhoneCustomer(action) {
         consumerId: result.data.data.user_id,
         action: 'newAppointment'
       }));
-      yield put(checkPhoneNumberCustomer({error : 'This phone number already exist!!!'}))
+      yield put(checkPhoneNumberCustomerError(true));
     }
   } catch (error) {
     yield put(checkPhoneNumberCustomerError(error))

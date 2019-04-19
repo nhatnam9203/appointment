@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import Popup from 'reactjs-popup';
 import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
-import axios from 'axios'
-
 
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
@@ -230,29 +228,10 @@ class AddAppointment extends React.Component {
     notes: [],
 
     error_phone: '',
-    success_addApointment:'',
-    error_addApointment : '',
+    success_addApointment: '',
+    error_addApointment: '',
   };
 
-  // async componentWillReceiveProps(nextProps){
-  //   console.log(nextProps.checkPhoneSuccess)
-  //   if(nextProps.checkPhoneSuccess === true){
-  //     this.setState({
-  //       isOpenSearchingPopup: false,
-  //       isOpenAddingPopup: true,
-  //     });
-  //     // if(nextProps.checkPhoneError){
-  //     //   console.log(nextProps.checkPhoneError)
-  //     //   // this.setState({error_phone : 'This phone number already exist !!!'});
-  //     //   // setTimeout(() => {
-  //     //   //   this.setState({
-  //     //   //     error_phone: '',
-  //     //   //   });
-  //     //   //   this.props.checkPhoneNumberCustomerError(false);
-  //     //   // }, 3000);
-  //     // }
-  //   } 
-  // }
 
   closeAllModal() {
     this.setState({
@@ -260,81 +239,19 @@ class AddAppointment extends React.Component {
       isOpenAddingPopup: false,
       phoneNumber: '',
     });
-    const { closeAddingAppointment } = this.props;
-    // this.props.checkPhoneNumberCustomerSuccess(false)
+    const { closeAddingAppointment, checkPhoneNumberCustomerSuccess, checkPhoneNumberCustomerError } = this.props;
+    checkPhoneNumberCustomerError(false);
+    checkPhoneNumberCustomerSuccess(false);
     closeAddingAppointment();
   }
 
   handleSubmitVerifyPhone(e) {
     e.preventDefault();
-    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/FindUserByPhone'
-    let formdt = new FormData();
-    formdt.append('phone', this.state.phoneNumber);
-
-    // this.props.checkPhoneNumberCustomer(this.state.phoneNumber);
-    axios.post(api, formdt, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
-    }).then((result) => {
-      if (result.data.data === "{}") {
-        this.setState({
-          isOpenSearchingPopup: false,
-          isOpenAddingPopup: true,
-        });
-      } else {
-        window.postMessage(JSON.stringify({
-          consumerId : result.data.data.user_id,
-          action : 'newAppointment'
-        }))
-        this.setState({ error_phone: 'This phone number already exist !!!' })
-        setTimeout(() => {
-          this.setState({ error_phone: '' })
-        }, 3000);
-      }
-    })
+    this.props.checkPhoneNumberCustomer(this.state.phoneNumber);
   }
   handleSubmitAppointment = () => {
-    const {first_name,last_name,phoneNumber} = this.state;
-    const api = 'https://hp-api-dev.azurewebsites.net/api/AppointmentV2/AddNewUser'
-    let formdt = new FormData();
-    formdt.append('first_name',first_name);
-    formdt.append('last_name',last_name);
-    formdt.append('phone',phoneNumber);
-    axios.post(api,{
-      first_name,last_name,phone : phoneNumber
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type" : "application/json",
-      }
-    }).then((result) => {
-      if (result.data.data === "{}") {
-
-      } else {
-        console.log(result.data);
-        const id = result.data.data
-        window.postMessage(JSON.stringify({
-          consumerId : id,
-          action : 'newAppointment'
-        }))
-        this.setState({ 
-          first_name : '',
-          last_name : '',
-          phone : '',
-          phoneNumber : '',
-          success_addApointment : 'Inserted customer',
-        });
-        setTimeout(() => {
-          this.setState({
-            isOpenSearchingPopup: false,
-            isOpenAddingPopup: false,
-            success_addApointment : '',
-          })
-        }, 2000);
-      }
-    })
-
+    const { first_name, last_name, phoneNumber } = this.state;
+    this.props.addCustomer({ first_name, last_name, phone: phoneNumber })
   }
 
   handleChange(e) {
@@ -360,9 +277,52 @@ class AddAppointment extends React.Component {
     </NoteInformation>
   );
 
+  phoneNumberError = () => {
+    this.setState({ error_phone: 'This phone number already exist !!!' })
+    setTimeout(() => {
+      this.setState({ error_phone: '' })
+    }, 3000);
+  }
+
+  showInsertCustomerSuccess = () => {
+    this.setState({
+      success_addApointment: 'Inserted customer',
+    });
+    setTimeout(() => {
+      this.setState({
+        first_name: '',
+        last_name: '',
+        phone: '',
+        phoneNumber: '',
+        isOpenSearchingPopup: false,
+        isOpenAddingPopup: false,
+        success_addApointment: '',
+      });
+      this.props.addCustomerSuccess(false)
+    }, 3000);
+  }
+
+  openFormInsertAfterCheckPhone = () => {
+    this.setState({
+      isOpenSearchingPopup: false,
+      isOpenAddingPopup: true,
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.checkPhoneError === true) {
+      this.phoneNumberError();
+    }
+    if (nextProps.checkPhoneSuccess === true) {
+      this.openFormInsertAfterCheckPhone();
+      if (nextProps.StateAddCustomerSuccess === true) {
+        this.showInsertCustomerSuccess();
+      }
+    }
+  }
 
   render() {
-    const { isOpenSearchingPopup, isOpenAddingPopup, notes, error_phone,success_addApointment } = this.state;
+    const { isOpenSearchingPopup, isOpenAddingPopup, notes, error_phone, success_addApointment } = this.state;
     const { appointment } = this.props;
     if (!appointment) return '';
     return (
@@ -410,7 +370,7 @@ class AddAppointment extends React.Component {
             </AddingWrapper.Header>
             <AddingWrapper.Body>
               <Form onSubmit={e => e.preventDefault()}>
-              {success_addApointment&&<p style={{ color:'#8D9440' }}>{success_addApointment}</p>}
+                {success_addApointment && <p style={{ color: '#8D9440' }}>{success_addApointment}</p>}
                 <Label>Phone number is not exist ! Get information !</Label>
                 <input value={this.state.phoneNumber} type="number" disabled />
               </Form>

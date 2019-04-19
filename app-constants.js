@@ -16,5 +16,6 @@ export const POST_STATUS_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/Update
 export const POST_UPDATE_STATUS_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/UpdateStatus`;
 export const POST_CHECK_PHONE_CUSTOMER = `${API_BASE_URL}/AppointmentV2/FindUserByPhone`;
 export const POST_DETAIL_APPOINTMENT = `${API_BASE_URL}/AppointmentV2`;
+export const POST_ADD_CUSTOMER = `${API_BASE_URL}/AppointmentV2/AddNewUser`;
 
 

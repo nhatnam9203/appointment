@@ -5,9 +5,7 @@ import Popup from 'reactjs-popup';
 import moment from 'moment';
 import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
-import axios from 'axios'
 
-const token = location.search.replace('?token=', '');
 
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
@@ -212,6 +210,7 @@ class Appointment extends React.Component {
     confirmationModal: false,
     services: [],
     products: [],
+    prices: [],
     notes: [
       {
         name: 'Rickie Da Vinci',
@@ -228,22 +227,25 @@ class Appointment extends React.Component {
 
   subtractService(index) {
     this.setState(state => {
-      const { services } = state;
+      const { services, prices } = state;
       if (services[index].duration >= 10) {
         services[index].duration -= 10;
+        prices[index] = (services[index].price * (services[index].duration / 10))
       }
       return {
-        services,
+        services, prices
       };
     });
   }
 
   addService(index) {
     this.setState(state => {
-      const { services } = state;
+      const { services, prices } = state;
       services[index].duration += 10;
+      prices[index] = (services[index].price * (services[index].duration / 10))
       return {
         services,
+        prices
       };
     });
   }
@@ -293,9 +295,12 @@ class Appointment extends React.Component {
   getTotalPrice() {
     const { services, products } = this.state;
     let total = 0;
-    services.forEach(service => {
-      total += service.price * (service.duration / 10);
-    });
+    // services.forEach(service => {
+    //   total += service.price * (service.duration / 10);
+    // });
+    this.state.prices.forEach(price => {
+      total += parseInt(price)
+    })
     products.forEach(product => {
       total += product.price * product.amount;
     });
@@ -315,11 +320,18 @@ class Appointment extends React.Component {
     deselectAppointment();
   }
 
-  componentWillReceiveProps(nextProps) {
+  async componentWillReceiveProps(nextProps) {
     if (nextProps.appointment) {
       this.setState({
         services: nextProps.appointment.options,
       });
+      await this.setState({prices : []})
+      for (let i = 0; i < nextProps.appointment.options.length; i++) {
+        const price = nextProps.appointment.options[i].price * (nextProps.appointment.options[i].duration / 10)
+        this.setState({
+          prices: [...this.state.prices, price]
+        })
+      }
     }
   }
 
@@ -373,8 +385,8 @@ class Appointment extends React.Component {
 
 
   updateStatus(status, servicesUpdate) {
-    const { appointment } = this.props;
-    this.props.updateAppointment({
+    const { appointment, updateAppointment } = this.props;
+    updateAppointment({
       appointment,
       total: this.getTotalPrice(),
       duration: this.getTotalDuration(),
@@ -452,6 +464,21 @@ class Appointment extends React.Component {
     );
   }
 
+
+  onChangePrice = (index, e) => {
+    const { prices } = this.state;
+    if(e.target.value === ''){
+      prices[index] = 0;
+    }else{
+      var newPrice = e.target.value;
+      if(e.target.value.charAt(0) === '0' ){
+        newPrice = e.target.value.substr(1);
+      }
+      prices[index] = newPrice;
+    }
+    this.setState({ prices })
+  }
+
   renderService(service, index) {
     const { appointment } = this.props;
     return (
@@ -475,7 +502,14 @@ class Appointment extends React.Component {
           </AdjustButton>
         </td>
         <td style={{ textAlign: 'center' }}>
-          {service.price * (service.duration / 10)}
+          {/* {service.price * (service.duration / 10)} */}
+          <input
+            value={this.state.prices[index]}
+            style={{ textAlign: 'center' }}
+            type="number"
+            min="0"
+            onChange={(e) => this.onChangePrice(index, e)}
+          />
         </td>
       </tr>
     );
@@ -492,7 +526,7 @@ class Appointment extends React.Component {
               Duration (ms)
             </th>
             <th style={{ textAlign: 'center' }}>Price ($)</th>
-          </tr> 
+          </tr>
         </thead>
         <tbody>{services.map((s, i) => this.renderService(s, i))}</tbody>
       </table>

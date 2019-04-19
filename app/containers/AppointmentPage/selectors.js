@@ -76,6 +76,10 @@ const makeSelectFCEvent = () =>
   createSelector(currentAppointment, appointmentState =>
     appointmentState.get('checkPhoneNumber_error'),
   );
+  const makeAddCustomerSuccess = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('addCustomer_success'),
+  );
 
 export {
   currentAppointment,
@@ -93,4 +97,5 @@ export {
   makeAddingAppointment,
   makeCheckPhoneSuccess,
   makeCheckPhoneError,
+  makeAddCustomerSuccess
 };

@@ -12,6 +12,7 @@
 import moment from 'moment';
 import { fromJS } from 'immutable';
 
+
 import {
   SELECT_DAY,
   SELECT_WEEK,
@@ -34,6 +35,10 @@ import {
   CLOSE_ADDING_APPOINTMENT,
   CANCEL_APPOINTMENT_SUCCESS,
   UPDATE_STATUS_APPOINTMENT_SUCCESS,
+  UPDATE_WAITING_APPOINTMENT,
+  CHECK_PHONE_ADD_CUSTOMER_SUCCESS,
+  CHECK_PHONE_ADD_CUSTOMER_ERROR,
+  ADD_CUSTOMER_SUCCESS,
 } from './constants';
 
 const initialCurrentDay = moment();
@@ -67,6 +72,10 @@ export const initialState = fromJS({
     calendar: [],
     waiting: [],
   },
+  checkPhoneNumber_success: false,
+  checkPhoneNumber_error: false,
+  addCustomer_success: false,
+  addCustomer_error: false,
 });
 
 function appointmentReducer(state = initialState, action) {
@@ -253,9 +262,26 @@ function appointmentReducer(state = initialState, action) {
         return [...arr];
       });
 
+    case UPDATE_WAITING_APPOINTMENT:
+
+      return state.updateIn(['appointments', 'waiting'], arr => {
+      
+        return [...arr];
+      });
+
+    case CHECK_PHONE_ADD_CUSTOMER_SUCCESS:
+      return state.set('checkPhoneNumber_success', action.phone);
+
+    case CHECK_PHONE_ADD_CUSTOMER_ERROR:
+      return state.set('checkPhoneNumber_error', action.error);
+
+    case ADD_CUSTOMER_SUCCESS:
+      return state.set('addCustomer_success', action.customer);
+
     default:
       return state;
   }
 }
+
 
 export default appointmentReducer;

@@ -4,7 +4,12 @@ import { compose } from 'redux';
 
 import Calendar from 'components/Calendar';
 
-import { loadWaitingAppointments, openAddingAppointment } from './actions';
+import {
+  loadWaitingAppointments,
+  openAddingAppointment,
+  updateCalendarInterval,
+  updateWaitingAppointment
+} from './actions';
 import {
   makeSelectWaitingAppointments,
   makeSelectWaitingIndexAppointments,
@@ -14,6 +19,8 @@ export function mapDispatchToProps(dispatch) {
   return {
     loadWaitingAppointments: day => dispatch(loadWaitingAppointments(day)),
     openAddingAppointment: app => dispatch(openAddingAppointment(app)),
+    updateCalendarInterval: app => dispatch(updateCalendarInterval(app)),
+    updateWaitingAppointment : appointment => dispatch(updateWaitingAppointment(appointment))
   };
 }
 

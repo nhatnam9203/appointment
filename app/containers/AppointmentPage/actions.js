@@ -48,6 +48,17 @@ import {
   UPDATE_STATUS_APPOINTMENT,
   UPDATE_STATUS_APPOINTMENT_SUCCESS,
   UPDATE_STATUS_APPOINTMENT_ERROR,
+  UPDATE_CALENDAR_INTERVAL,
+  CHECK_PHONE_ADD_CUSTOMER,
+  CHECK_PHONE_ADD_CUSTOMER_SUCCESS,
+  CHECK_PHONE_ADD_CUSTOMER_ERROR,
+  ADD_CUSTOMER,
+  ADD_CUSTOMER_SUCCESS,
+  ADD_CUSTOMER_ERROR,
+  UPDATE_WAITING_APPOINTMENT,
+  UPDATE_APPOINTMENT_STATUS,
+  UPDATE_APPOINTMENT_STATUS_SUCCESS,
+  UPDATE_APPOINTMENT_STATUS_ERROR,
 } from './constants';
 
 /**
@@ -290,14 +301,21 @@ export function appointmentAssigningError(error) {
  * @param  {number} appointmentId The url options
  * @param  {number} newPositionIndex The url options
  * @param  {object} newTime The url options
+ * @param  {object} newEndTime The url options
  * @return {object} An action object with a type of MOVE_APPOINTMENT
  */
-export function moveAppointment(appointmentId, newPositionIndex, newTime) {
+export function moveAppointment(
+  appointmentId,
+  newPositionIndex,
+  newTime,
+  newEndTime,
+) {
   return {
     type: MOVE_APPOINTMENT,
     appointmentId,
     newPositionIndex,
     newTime,
+    newEndTime,
   };
 }
 
@@ -400,12 +418,14 @@ export function appointmentCancellingError(error) {
 /**
  * Update status of appointment, this action starts the request saga
  * @param  {number} appointmentId The error
+ * @param  {object} bookingServices The error
  * @return {object} An action object with a type of UPDATE_STATUS_APPOINTMENT
  */
-export function updateStatusAppointment(appointmentId) {
+export function updateStatusAppointment(appointmentId, bookingServices) {
   return {
     type: UPDATE_STATUS_APPOINTMENT,
     appointmentId,
+    bookingServices,
   };
 }
 
@@ -432,3 +452,71 @@ export function appointmentUpdatingStatusError(error) {
     error,
   };
 }
+
+// FIXME: This is hard code for real-time calendar
+export function updateCalendarInterval() {
+  return {
+    type: UPDATE_CALENDAR_INTERVAL,
+  };
+}
+
+
+/* Check phone number to add customer */
+export function checkPhoneNumberCustomer(phone) {
+  return {
+    type: CHECK_PHONE_ADD_CUSTOMER,
+    phone,
+  };
+}
+export function checkPhoneNumberCustomerSuccess(phone) {
+  return {
+    type: CHECK_PHONE_ADD_CUSTOMER_SUCCESS,
+    phone,
+  };
+}
+export function checkPhoneNumberCustomerError(error) {
+  return {
+    type: CHECK_PHONE_ADD_CUSTOMER_ERROR,
+    error,
+  };
+}
+
+
+/* Add Customer */
+export function addCustomer(customer) {
+  return {
+    type: ADD_CUSTOMER,
+    customer,
+  };
+}
+export function addCustomerSuccess(customer) {
+  return {
+    type: ADD_CUSTOMER_SUCCESS,
+    customer,
+  };
+}
+export function addCustomerError(error) {
+  return {
+    type: ADD_CUSTOMER_ERROR,
+    error,
+  };
+}
+
+export const updateWaitingAppointment = (appointment) => ({
+  type: UPDATE_WAITING_APPOINTMENT,
+  appointment
+});
+
+export const updateAppointment = (appointment) => ({
+  type: UPDATE_APPOINTMENT_STATUS,
+  appointment
+});
+export const updateAppointmentSuccess = (appointment) => ({
+  type: UPDATE_APPOINTMENT_STATUS_SUCCESS,
+  appointment
+});
+export const updateAppointmentError = (error) => ({
+  type: UPDATE_APPOINTMENT_STATUS_ERROR,
+  error
+})
+

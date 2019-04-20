@@ -67,6 +67,20 @@ const makeSelectFCEvent = () =>
     appointmentState.get('selectedFCEvent'),
   );
 
+  const makeCheckPhoneSuccess = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('checkPhoneNumber_success'),
+  );
+
+  const makeCheckPhoneError = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('checkPhoneNumber_error'),
+  );
+  const makeAddCustomerSuccess = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('addCustomer_success'),
+  );
+
 export {
   currentAppointment,
   makeCurrentDay,
@@ -81,4 +95,7 @@ export {
   makeSelectAppointment,
   makeSelectFCEvent,
   makeAddingAppointment,
+  makeCheckPhoneSuccess,
+  makeCheckPhoneError,
+  makeAddCustomerSuccess
 };

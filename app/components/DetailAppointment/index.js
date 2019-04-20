@@ -6,11 +6,13 @@ import moment from 'moment';
 import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
 
+
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
   padding: 0 !important;
   border: none !important;
-  overflow: hidden;
+  overflow-y: scroll;
+  height: 450px;
 `;
 
 const AppPopupWrapper = styled.div`
@@ -19,7 +21,7 @@ const AppPopupWrapper = styled.div`
 
 AppPopupWrapper.Header = styled.div`
   height: 3rem;
-  font-size: 20px;
+  font-size: 26px;
   font-weight: bold;
   background: ${props => props.backgroundColor};
   color: #ffffff;
@@ -48,7 +50,6 @@ AppPopupWrapper.Body = styled.div`
 AppPopupWrapper.Footer = styled.div`
   display: flex;
   padding: 0.5rem 1rem 1rem 1rem;
-
   & > div {
     width: 50%;
     text-align: center;
@@ -86,7 +87,6 @@ AppointmentWrapper.Footer = styled(AppPopupWrapper.Footer)`
 const UserInformation = styled.div`
   display: flex;
   padding: 0.5rem;
-
   & > div {
     width: 50%;
     display: flex;
@@ -114,7 +114,6 @@ const NoteWrapper = styled.div`
 
 NoteWrapper.Form = styled.form`
   display: flex;
-
   & > input {
     flex: 1;
     background: #ffffff;
@@ -139,12 +138,10 @@ NoteWrapper.Form = styled.form`
 const NoteInformation = styled.div`
   display: flex;
   padding: 0.5rem;
-
   & > div:nth-child(1),
   & > div:nth-child(2) {
     width: 20%;
   }
-
   & > div:last-child {
     width: 60%;
   }
@@ -153,7 +150,6 @@ const NoteInformation = styled.div`
 const AppointmentInformation = styled.div`
   display: flex;
   padding: 0.5rem;
-
   & > div {
     width: 30%;
     display: flex;
@@ -207,39 +203,14 @@ ConfirmationWrapper.Footer = styled(AppPopupWrapper.Footer)`
   //
 `;
 
+
 class Appointment extends React.Component {
   state = {
     noteValue: '',
     confirmationModal: false,
-    services: [
-      {
-        name: 'Service 1',
-        price: 50,
-        duration: 15,
-      },
-      {
-        name: 'Service 2',
-        price: 50,
-        duration: 15,
-      },
-      {
-        name: 'Service 3',
-        price: 50,
-        duration: 15,
-      },
-    ],
-    products: [
-      {
-        name: 'Product 1',
-        price: 20,
-        amount: 5,
-      },
-      {
-        name: 'Product 2',
-        price: 20,
-        amount: 5,
-      },
-    ],
+    services: [],
+    products: [],
+    prices: [],
     notes: [
       {
         name: 'Rickie Da Vinci',
@@ -256,22 +227,25 @@ class Appointment extends React.Component {
 
   subtractService(index) {
     this.setState(state => {
-      const { services } = state;
-      if (services[index].duration >= 15) {
-        services[index].duration -= 15;
+      const { services, prices } = state;
+      if (services[index].duration >= 10) {
+        services[index].duration -= 10;
+        prices[index] = (services[index].price * (services[index].duration / 10))
       }
       return {
-        services,
+        services, prices
       };
     });
   }
 
   addService(index) {
     this.setState(state => {
-      const { services } = state;
-      services[index].duration += 15;
+      const { services, prices } = state;
+      services[index].duration += 10;
+      prices[index] = (services[index].price * (services[index].duration / 10))
       return {
         services,
+        prices
       };
     });
   }
@@ -321,11 +295,22 @@ class Appointment extends React.Component {
   getTotalPrice() {
     const { services, products } = this.state;
     let total = 0;
-    services.forEach(service => {
-      total += service.price * (service.duration / 15);
-    });
+    // services.forEach(service => {
+    //   total += service.price * (service.duration / 10);
+    // });
+    this.state.prices.forEach(price => {
+      total += parseInt(price)
+    })
     products.forEach(product => {
       total += product.price * product.amount;
+    });
+    return total;
+  }
+  getTotalDuration() {
+    const { services } = this.state;
+    let total = 0;
+    services.forEach(service => {
+      total += service.duration;
     });
     return total;
   }
@@ -333,6 +318,21 @@ class Appointment extends React.Component {
   closeModal() {
     const { deselectAppointment } = this.props;
     deselectAppointment();
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    if (nextProps.appointment) {
+      this.setState({
+        services: nextProps.appointment.options,
+      });
+      await this.setState({prices : []})
+      for (let i = 0; i < nextProps.appointment.options.length; i++) {
+        const price = nextProps.appointment.options[i].price * (nextProps.appointment.options[i].duration / 10)
+        this.setState({
+          prices: [...this.state.prices, price]
+        })
+      }
+    }
   }
 
   openConfirmationModal() {
@@ -350,12 +350,49 @@ class Appointment extends React.Component {
   confirmCancelAppointment() {
     this.closeConfirmationModal();
     const { appointment, cancelAppointment } = this.props;
+    const { services } = this.state;
     cancelAppointment(appointment.id);
+    const servicesUpdate = services.map(
+      service => `${service.id}@${service.duration}@${appointment.memberId}`,
+    );
+    this.updateStatus("Waiting", servicesUpdate)
   }
 
   nextStatus() {
     const { appointment, nextStatus } = this.props;
-    nextStatus(appointment.id);
+    const { services } = this.state;
+    const servicesUpdate = services.map(
+      service => `${service.id}@${service.duration}@${appointment.memberId}`,
+    );
+    if (appointment.status === "CONFIRMED") {
+      this.updateStatus("CheckIn", servicesUpdate)
+    }
+    if (appointment.status === "ASSIGNED") {
+      this.updateStatus("Confirm", servicesUpdate)
+    }
+    if (appointment.status === "CHECKED_IN") {
+      this.updateStatusPaid(appointment.id);
+    }
+    nextStatus(appointment.id, servicesUpdate);
+  }
+
+  updateStatusPaid = (idAppointment) => {
+    window.postMessage(JSON.stringify({
+      appointmentId: idAppointment,
+      action: 'checkout'
+    }));
+  }
+
+
+  updateStatus(status, servicesUpdate) {
+    const { appointment, updateAppointment } = this.props;
+    updateAppointment({
+      appointment,
+      total: this.getTotalPrice(),
+      duration: this.getTotalDuration(),
+      BookingServices2: servicesUpdate,
+      status
+    })
   }
 
   renderHeader() {
@@ -383,7 +420,7 @@ class Appointment extends React.Component {
     }
     if (appointment.status === 'PAID') {
       return (
-        <AppointmentWrapper.Header backgroundColor="#00dc00">
+        <AppointmentWrapper.Header backgroundColor="#00b4f7">
           Paid Appointment
         </AppointmentWrapper.Header>
       );
@@ -427,6 +464,21 @@ class Appointment extends React.Component {
     );
   }
 
+
+  onChangePrice = (index, e) => {
+    const { prices } = this.state;
+    if(e.target.value === ''){
+      prices[index] = 0;
+    }else{
+      var newPrice = e.target.value;
+      if(e.target.value.charAt(0) === '0' ){
+        newPrice = e.target.value.substr(1);
+      }
+      prices[index] = newPrice;
+    }
+    this.setState({ prices })
+  }
+
   renderService(service, index) {
     const { appointment } = this.props;
     return (
@@ -434,11 +486,11 @@ class Appointment extends React.Component {
         <td>{service.name}</td>
         <td style={{ textAlign: 'center' }}>
           <AdjustButton
-            active={appointment.status !== 'PAID' && service.duration > 15}
-            disabled={appointment.status === 'PAID' || service.duration <= 15}
+            active={appointment.status !== 'PAID' && service.duration > 10}
+            disabled={appointment.status === 'PAID' || service.duration <= 10}
             onClick={() => this.subtractService(index)}
           >
-            -15&#39;
+            -10&#39;
           </AdjustButton>
           {service.duration}
           <AdjustButton
@@ -446,11 +498,18 @@ class Appointment extends React.Component {
             disabled={appointment.status === 'PAID' || service.duration >= 90}
             onClick={() => this.addService(index)}
           >
-            +15&#39;
+            +10&#39;
           </AdjustButton>
         </td>
         <td style={{ textAlign: 'center' }}>
-          {service.price * (service.duration / 15)}
+          {/* {service.price * (service.duration / 10)} */}
+          <input
+            value={this.state.prices[index]}
+            style={{ textAlign: 'center' }}
+            type="number"
+            min="0"
+            onChange={(e) => this.onChangePrice(index, e)}
+          />
         </td>
       </tr>
     );
@@ -582,6 +641,7 @@ class Appointment extends React.Component {
         <AppointmentPopup
           closeOnDocumentClick
           open
+          onOpen={() => this.openModal()}
           onClose={() => this.closeModal()}
         >
           <AppointmentWrapper>

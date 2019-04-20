@@ -6,6 +6,10 @@ import FCAgenda from './FCAgenda';
 import FCDragZone from './FCDragZone';
 
 import { MAIN_CALENDAR_OPTIONS } from './constants';
+import axios from 'axios'
+const token = location.search.replace('?token=', '');
+
+
 
 const CalendarWrapper = styled.div`
   display: flex;
@@ -54,6 +58,34 @@ class Calendar extends React.Component {
     loadWaitingAppointments();
   }
 
+  // FIXME: This is hard code for real-time calendar
+  componentDidMount() {
+    const { updateCalendarInterval } = this.props;
+    setInterval(() => {
+      updateCalendarInterval();
+        this.checkWaiting5s(this.props.waitingAppointments)
+    }, 5000);
+  }
+  checkWaiting5s = (waitingAppointments) => {
+    const api = 'https://hp-api-dev.azurewebsites.net/api/Appointments/Waiting';
+    axios.post(api, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    }).then(result => {
+      const WaitingList = result.data.data;
+      if(waitingAppointments){
+        if((WaitingList.length > waitingAppointments.length)){
+          this.props.loadWaitingAppointments();
+        }
+      }
+      if(!waitingAppointments){
+        this.props.loadWaitingAppointments();
+      }
+    })
+  }
+
   render() {
     const {
       waitingAppointments,
@@ -69,8 +101,8 @@ class Calendar extends React.Component {
           {!!waitingAppointments && !!waitingAppointments.length ? (
             <FCDragZone events={waitingAppointments} index={waitingIndex} />
           ) : (
-            ''
-          )}
+              ''
+            )}
           <SignInWrapper>
             <SignInWrapper.Button onClick={() => openAddingAppointment({})}>
               Sign in
@@ -87,6 +119,7 @@ Calendar.propTypes = {
   loadWaitingAppointments: PropTypes.func,
   waitingIndex: PropTypes.number,
   openAddingAppointment: PropTypes.func,
+  updateCalendarInterval: PropTypes.func,
 };
 
 export default Calendar;

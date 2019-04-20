@@ -213,14 +213,25 @@ const NoteInformation = styled.div`
   }
 `;
 
+const token = location.search.replace('?token=', '');
+
+
 class AddAppointment extends React.Component {
   state = {
     isOpenSearchingPopup: true,
     isOpenAddingPopup: false,
+    first_name: '',
+    last_name: '',
+    phone: '',
     phoneNumber: '',
     noteValue: '',
     notes: [],
+
+    error_phone: '',
+    success_addApointment: '',
+    error_addApointment: '',
   };
+
 
   closeAllModal() {
     this.setState({
@@ -228,16 +239,19 @@ class AddAppointment extends React.Component {
       isOpenAddingPopup: false,
       phoneNumber: '',
     });
-    const { closeAddingAppointment } = this.props;
+    const { closeAddingAppointment, checkPhoneNumberCustomerSuccess, checkPhoneNumberCustomerError } = this.props;
+    checkPhoneNumberCustomerError(false);
+    checkPhoneNumberCustomerSuccess(false);
     closeAddingAppointment();
   }
 
-  handleSubmit(e) {
+  handleSubmitVerifyPhone(e) {
     e.preventDefault();
-    this.setState({
-      isOpenSearchingPopup: false,
-      isOpenAddingPopup: true,
-    });
+    this.props.checkPhoneNumberCustomer(this.state.phoneNumber);
+  }
+  handleSubmitAppointment = () => {
+    const { first_name, last_name, phoneNumber } = this.state;
+    this.props.addCustomer({ first_name, last_name, phone: phoneNumber })
   }
 
   handleChange(e) {
@@ -263,33 +277,81 @@ class AddAppointment extends React.Component {
     </NoteInformation>
   );
 
+  phoneNumberError = () => {
+    this.setState({ error_phone: 'This phone number already exist !!!' })
+    setTimeout(() => {
+      this.setState({ error_phone: '' })
+    }, 3000);
+  }
+
+  showInsertCustomerSuccess = () => {
+    this.setState({
+      success_addApointment: 'Inserted customer',
+    });
+    setTimeout(() => {
+      this.setState({
+        first_name: '',
+        last_name: '',
+        phone: '',
+        phoneNumber: '',
+        isOpenSearchingPopup: false,
+        isOpenAddingPopup: false,
+        success_addApointment: '',
+      });
+      this.props.addCustomerSuccess(false)
+    }, 3000);
+  }
+
+  openFormInsertAfterCheckPhone = () => {
+    this.setState({
+      isOpenSearchingPopup: false,
+      isOpenAddingPopup: true,
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.checkPhoneError === true) {
+      this.phoneNumberError();
+    }
+    if (nextProps.checkPhoneSuccess === true) {
+      this.openFormInsertAfterCheckPhone();
+      if (nextProps.StateAddCustomerSuccess === true) {
+        this.showInsertCustomerSuccess();
+      }
+    }
+  }
+
   render() {
-    const { isOpenSearchingPopup, isOpenAddingPopup, notes } = this.state;
+    const { isOpenSearchingPopup, isOpenAddingPopup, notes, error_phone, success_addApointment } = this.state;
     const { appointment } = this.props;
     if (!appointment) return '';
     return (
       <div>
-        <SearchingPopup open={isOpenSearchingPopup}>
+        <SearchingPopup
+          open={isOpenSearchingPopup}
+          closeOnDocumentClick={false}
+        >
           <SearchingWrapper>
             <SearchingWrapper.Close onClick={() => this.closeAllModal()}>
               <FaTimesCircle />
             </SearchingWrapper.Close>
-            <SearchingWrapper.Header backgroundColor="#00b4f7">
+            <SearchingWrapper.Header backgroundColor="#0071C5">
               Add Appointment
             </SearchingWrapper.Header>
             <SearchingWrapper.Body>Enter phone number</SearchingWrapper.Body>
             <SearchingWrapper.Footer>
-              <Form onSubmit={e => this.handleSubmit(e)}>
+              <Form onSubmit={e => this.handleSubmitVerifyPhone(e)}>
                 <input
                   value={this.state.phoneNumber}
                   onChange={e => this.handleChange(e)}
                   type="number"
                 />
                 <div>
-                  <Button type="submit" primary>
+                  <Button id="submit-create-appointment" type="submit" primary>
                     Next
                   </Button>
                 </div>
+                {error_phone && <p style={{ color: 'red' }}>{error_phone}</p>}
               </Form>
             </SearchingWrapper.Footer>
           </SearchingWrapper>
@@ -297,6 +359,7 @@ class AddAppointment extends React.Component {
         <AddingPopup
           open={isOpenAddingPopup}
           onClose={() => this.closeAllModal()}
+          closeOnDocumentClick={false}
         >
           <AddingWrapper>
             <AddingWrapper.Close onClick={() => this.closeAllModal()}>
@@ -307,6 +370,7 @@ class AddAppointment extends React.Component {
             </AddingWrapper.Header>
             <AddingWrapper.Body>
               <Form onSubmit={e => e.preventDefault()}>
+                {success_addApointment && <p style={{ color: '#8D9440' }}>{success_addApointment}</p>}
                 <Label>Phone number is not exist ! Get information !</Label>
                 <input value={this.state.phoneNumber} type="number" disabled />
               </Form>
@@ -315,18 +379,18 @@ class AddAppointment extends React.Component {
                 <div
                   style={{ display: 'flex', justifyContent: 'space-between' }}
                 >
-                  <input placeholder="First Name" className="w-50" />
-                  <input placeholder="Last Name" className="w-50" />
+                  <input value={this.state.first_name} onChange={e => this.setState({ first_name: e.target.value })} placeholder="First Name" className="w-50" />
+                  <input value={this.state.last_name} onChange={e => this.setState({ last_name: e.target.value })} placeholder="Last Name" className="w-50" />
                 </div>
               </Form>
               <Form className="left" onSubmit={e => e.preventDefault()}>
                 <Label>Referrer Phone Number</Label>
-                <input placeholder="0123 123 123" />
+                <input value={this.state.phone} onChange={e => this.setState({ phone: e.target.value })} placeholder="Phone number" />
               </Form>
               <NoteWrapper>
                 <Label>Note:</Label>
                 {notes.map(this.renderNote)}
-                <NoteWrapper.Form onSubmit={e => this.handleSubmitNote(e)}>
+                <NoteWrapper.Form onSubmit={e => e.preventDefault()}>
                   <input
                     value={this.state.noteValue}
                     onChange={e => this.handleChangeNote(e)}
@@ -339,7 +403,9 @@ class AddAppointment extends React.Component {
             </AddingWrapper.Body>
             <AddingWrapper.Footer>
               <div>
-                <Button type="submit" primary>
+                <Button
+                  onClick={this.handleSubmitAppointment}
+                  type="button" primary>
                   Next
                 </Button>
               </div>

@@ -7,10 +7,10 @@ import 'jquery-ui';
 const DragZoneWrapper = styled.div`
   height: calc(100vh - 4rem - 4rem - 4rem);
   //overflow: hidden;
-
   #waiting-events {
     height: 100%;
     overflow: scroll;
+    -webkit-overflow-scrolling: touch;
   }
 `;
 
@@ -36,12 +36,14 @@ function handleDrag() {
     revert: true,
     revertDuration: 0,
   });
+
 }
 
 class FCDragZone extends React.PureComponent {
   componentDidMount() {
     // setInterval(() => {
     $('#waiting-events > div').each(handleDrag);
+
     // }, 500);
   }
 
@@ -59,9 +61,11 @@ class FCDragZone extends React.PureComponent {
               <div className="app-event__id-number">#{event.id}</div>
               <div className="app-event__full-name">{event.userFullName}</div>
               <div className="app-event__phone-number">{event.phoneNumber}</div>
-              <div className="app-event__option">- {event.option1}</div>
-              <div className="app-event__option">- {event.option2}</div>
-              <div className="app-event__option">- {event.option3}</div>
+              {event.options.map(option => (
+                <div className="app-event__option" key={option.id}>
+                  - {option.name}
+                </div>
+              ))}
             </EventWrapper>
           ))}
         </div>

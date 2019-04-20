@@ -4,8 +4,11 @@ export const token = getURLParam('token');
 export const storeid = getURLParam('storeid');
 
 export const API_PORT = 8010;
-export const DEV_API_BASE_URL = `https://hp-api-dev.azurewebsites.net/`;
-export const PROD_API_BASE_URL = `https://hp-api-dev.azurewebsites.net/`;
+
+// export const DEV_API_BASE_URL = `https://hp-api-dev.azurewebsites.net`;
+// export const PROD_API_BASE_URL = `https://hp-api-dev.azurewebsites.net`;
+export const DEV_API_BASE_URL = `https://api.harmonypayment.com`;
+export const PROD_API_BASE_URL = `https://api.harmonypayment.com`;
 
 export const API_BASE_URL =
   process.env.NODE_ENV === 'production' ? `${PROD_API_BASE_URL}/api` : `${DEV_API_BASE_URL}/api`;

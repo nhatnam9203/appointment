@@ -68,27 +68,28 @@ class Calendar extends React.Component {
     const { updateCalendarInterval } = this.props;
     setInterval(() => {
       updateCalendarInterval();
-        this.checkWaiting5s(this.props.waitingAppointments)
-    }, 5000);
+      // this.checkWaiting5s(this.props.waitingAppointments)
+    }, 8000);
   }
   checkWaiting5s = (waitingAppointments) => {
     
-    const apiWaitingListStatusQuery = 'waiting';
-    const requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
+    var apiWaitingListStatusQuery = 'waiting';
+    var requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
 
-    const currentDate = this.props.currentDay;
+    var currentDate = this.props.currentDay;
     // Query params for this api
-    const apiDateQuery =
+    var apiDateQuery =
       currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
 
-    const formDataWaitingList = new FormData();
-    formDataWaitingList.append('date', apiDateQuery);
-    formDataWaitingList.append('storeid', storeid);
-    formDataWaitingList.append('status', apiWaitingListStatusQuery)
+    var formDataWaitingListReload = new FormData();
+    formDataWaitingListReload.set('date', apiDateQuery);
+    formDataWaitingListReload.set('storeid', storeid);
+    formDataWaitingListReload.set('status', apiWaitingListStatusQuery);
 
-    axios.post(requestURL, {formDataWaitingList}, {
+    axios.post(requestURL, formDataWaitingListReload, {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
       }
     }).then(result => {
       const WaitingList = result.data.data;

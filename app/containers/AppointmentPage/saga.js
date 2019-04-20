@@ -215,17 +215,17 @@ export function* getWaitingAppointments() {
     const apiDateQuery =
       currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
 
-    const formDataWaitingList = new FormData();
-    formDataWaitingList.append('date', apiDateQuery);
-    formDataWaitingList.append('storeid', storeid);
-    formDataWaitingList.append('status', apiWaitingListStatusQuery)
+    let formDataWaitingListSaga = new FormData();
+    formDataWaitingListSaga.append("date", apiDateQuery);
+    formDataWaitingListSaga.append("storeid", storeid);
+    formDataWaitingListSaga.append("status", apiWaitingListStatusQuery);
 
     const response = yield call(request, requestURL.toString(), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`
       },
-      body: formDataWaitingList
+      body: formDataWaitingListSaga
     });
 
     const appointments =

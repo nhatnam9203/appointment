@@ -2,7 +2,7 @@ import { delay } from 'redux-saga';
 import { call, fork, put, takeLatest, all, select } from 'redux-saga/effects';
 import moment from 'moment';
 import axios from 'axios';
-
+import getURLParam from 'utils/helper'
 import request from 'utils/request';
 
 import {
@@ -73,7 +73,10 @@ import {
   POST_UPDATE_APPOINTMENT_API,
   POST_CHECK_PHONE_CUSTOMER,
   POST_DETAIL_APPOINTMENT,
-  POST_ADD_CUSTOMER
+  POST_ADD_CUSTOMER,
+  BASE_URL,
+  API_BASE_URL,
+  VAR_DEFAULT_AVATAR_PATH
 } from '../../../app-constants';
 
 // import { members as mockedMembers } from '../../assets/mocks/members';
@@ -87,7 +90,9 @@ import {
 
 /* **************************** API Caller ********************************* */
 // eslint-disable-next-line no-restricted-globals
-const token = location.search.replace('?token=', '');
+
+const token = getURLParam('token');
+const storeid = getURLParam('storeid');
 
 const headers = {
   'Content-Type': 'application/json',
@@ -142,9 +147,8 @@ const memberAdapter = member => ({
   id: member.id,
   title: `${member.first_name} ${member.last_name}`,
   imageUrl:
-    (member.imageurl &&
-      `https://hp-api-dev.azurewebsites.net/${member.imageurl}`) ||
-    'https://png.pngtree.com/svg/20161027/631929649c.svg',
+    (member.imageurl && `${BASE_URL}/${member.imageurl}`) ||
+    `${BASE_URL}/${VAR_DEFAULT_AVATAR_PATH}`,
   orderNumber: member.orderNumber,
 });
 
@@ -170,7 +174,8 @@ export function* getMembers() {
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
-    const requestURL = new URL(GET_MEMBERS_API);
+   
+    const requestURL = new URL(`${GET_MEMBERS_API}/${storeid}`);
     const response = yield call(request, requestURL.toString(), {
       method: 'POST',
       headers,
@@ -224,6 +229,7 @@ export function* getWaitingAppointments() {
 }
 
 export function* getAppointmentsByMembersAndDate() {
+
   const displayedMembers = yield select(makeSelectDisplayedMembers());
   const currentDate = yield select(makeCurrentDay());
 

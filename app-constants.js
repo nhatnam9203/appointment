@@ -1,11 +1,13 @@
 export const API_PORT = 8010;
-export const DEV_API_BASE_URL = `https://hp-api-dev.azurewebsites.net/api`;
-export const PROD_API_BASE_URL = `https://hp-api-dev.azurewebsites.net/api`;
+export const DEV_API_BASE_URL = `https://hp-api-dev.azurewebsites.net/`;
+export const PROD_API_BASE_URL = `https://hp-api-dev.azurewebsites.net/`;
 
 export const API_BASE_URL =
-  process.env.NODE_ENV === 'production' ? PROD_API_BASE_URL : DEV_API_BASE_URL;
+  process.env.NODE_ENV === 'production' ? `${PROD_API_BASE_URL}/api` : `${DEV_API_BASE_URL}/api`;
+export const BASE_URL =
+  process.env.NODE_ENV === 'production' ? `${PROD_API_BASE_URL}` : `${DEV_API_BASE_URL}`;
 
-export const GET_MEMBERS_API = `${API_BASE_URL}/Staff`;
+export const GET_MEMBERS_API = `${API_BASE_URL}/Staff/ByStore/`;
 export const GET_WAITING_APPOINTMENTS_API = `${API_BASE_URL}/Appointments/Waiting`;
 export const GET_APPOINTMENTS_BY_MEMBERS_DATE_API = `${API_BASE_URL}/Appointments/Member`;
 export const POST_ASSIGN_APPOINTMENT_API = `${API_BASE_URL}/AppointmentV2/DragDrop`;
@@ -18,4 +20,4 @@ export const POST_CHECK_PHONE_CUSTOMER = `${API_BASE_URL}/AppointmentV2/FindUser
 export const POST_DETAIL_APPOINTMENT = `${API_BASE_URL}/AppointmentV2`;
 export const POST_ADD_CUSTOMER = `${API_BASE_URL}/AppointmentV2/AddNewUser`;
 
-
+export const VAR_DEFAULT_AVATAR_PATH = `/upload/staff/avatar.svg`;

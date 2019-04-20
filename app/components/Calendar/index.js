@@ -69,7 +69,7 @@ class Calendar extends React.Component {
     setInterval(() => {
       updateCalendarInterval();
         this.checkWaiting5s(this.props.waitingAppointments)
-    }, 100000);
+    }, 5000);
   }
   checkWaiting5s = (waitingAppointments) => {
     

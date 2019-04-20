@@ -7,7 +7,12 @@ import FCDragZone from './FCDragZone';
 
 import { MAIN_CALENDAR_OPTIONS } from './constants';
 import axios from 'axios'
-const token = location.search.replace('?token=', '');
+
+import {
+  GET_WAITING_APPOINTMENTS_API,
+  token,
+  storeid
+} from '../../../app-constants';
 
 
 
@@ -64,14 +69,26 @@ class Calendar extends React.Component {
     setInterval(() => {
       updateCalendarInterval();
         this.checkWaiting5s(this.props.waitingAppointments)
-    }, 5000);
+    }, 100000);
   }
   checkWaiting5s = (waitingAppointments) => {
-    const api = 'https://hp-api-dev.azurewebsites.net/api/Appointments/Waiting';
-    axios.post(api, {}, {
+    
+    const apiWaitingListStatusQuery = 'waiting';
+    const requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
+
+    const currentDate = this.props.currentDay;
+    // Query params for this api
+    const apiDateQuery =
+      currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
+
+    const formDataWaitingList = new FormData();
+    formDataWaitingList.append('date', apiDateQuery);
+    formDataWaitingList.append('storeid', storeid);
+    formDataWaitingList.append('status', apiWaitingListStatusQuery)
+
+    axios.post(requestURL, {formDataWaitingList}, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
       }
     }).then(result => {
       const WaitingList = result.data.data;

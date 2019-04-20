@@ -76,6 +76,8 @@ import {
   POST_ADD_CUSTOMER,
   BASE_URL,
   API_BASE_URL,
+  token,
+  storeid,
   VAR_DEFAULT_AVATAR_PATH
 } from '../../../app-constants';
 
@@ -89,10 +91,6 @@ import {
 } from '../../components/Calendar/constants';
 
 /* **************************** API Caller ********************************* */
-// eslint-disable-next-line no-restricted-globals
-
-const token = getURLParam('token');
-const storeid = getURLParam('storeid');
 
 const headers = {
   'Content-Type': 'application/json',
@@ -195,14 +193,14 @@ export function* getMembers() {
 
 export function* getWaitingAppointments() {
   // Query params for this api
-  const apiStatusQuery = 'WAITING';
+  const apiWaitingListStatusQuery = 'waiting';
 
   try {
     /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     // yield delay(200);
     // const appointments = mockedAppointments.filter(
-    //   app => app.status === apiStatusQuery,
+    //   app => app.status === apiWaitingListStatusQuery,
     // );
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
     /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
@@ -210,10 +208,24 @@ export function* getWaitingAppointments() {
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
     const requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
-    requestURL.searchParams.append('status', apiStatusQuery);
+    // requestURL.searchParams.append('status', apiWaitingListStatusQuery);
+    const currentDate = yield select(makeCurrentDay());
+
+    // Query params for this api
+    const apiDateQuery =
+      currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
+
+    const formDataWaitingList = new FormData();
+    formDataWaitingList.append('date', apiDateQuery);
+    formDataWaitingList.append('storeid', storeid);
+    formDataWaitingList.append('status', apiWaitingListStatusQuery)
+
     const response = yield call(request, requestURL.toString(), {
       method: 'POST',
-      headers,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formDataWaitingList
     });
 
     const appointments =
@@ -234,7 +246,7 @@ export function* getAppointmentsByMembersAndDate() {
   const currentDate = yield select(makeCurrentDay());
 
   // Query params for this api
-  const apiDateQuery =
+  let apiDateQuery =
     currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
   const apiMemberIdsQuery = displayedMembers.map(member => member.id);
   try {
@@ -320,7 +332,7 @@ export function* assignAppointment(action) {
       PaidStatus: true,
       Status: 1,
       CreateDate: new Date().toString().substring(0, 15),
-      User_id: kq.data.data.user_id,
+      User_id: kq.data.data.user_id
     });
 
 

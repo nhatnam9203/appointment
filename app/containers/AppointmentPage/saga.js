@@ -323,19 +323,17 @@ export function* assignAppointment(action) {
     const result = drag_Appointment(requestURL.toString(), {
       id,
       Staff_id: memberId,
-      StoreId: 1,
+      StoreId: storeid,
       FromTime: start,
       ToTime: moment(end).add(60, 'minutes').format().substr(0, 19),
       total: 0,
       duration: 0,
-      CheckinStatus: "CheckIn",
+      CheckinStatus: "checkin",
       PaidStatus: true,
       Status: 1,
       CreateDate: new Date().toString().substring(0, 15),
       User_id: kq.data.data.user_id
     });
-
-
 
     // const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
     // const formData = new FormData();
@@ -409,12 +407,13 @@ export function* moveAppointment(action) {
     /* --------------------------------------------------------------- */
     /* --------------------------------------------------------------- */
 
+
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    const result = update_Appointment(requestURL.toString(), {
+    const result = yield update_Appointment(requestURL.toString(), {
       id: appointment.id,
       Staff_id: appointment.memberId,
-      StoreId: 1,
+      StoreId: storeid,
       FromTime: appointment.start,
       ToTime: ToTime.substr(0, 19),
       total: kq.data.data.total,
@@ -457,7 +456,7 @@ export function* putBackAppointment(action) {
       ToTime: end,
       total: 0,
       duration: 0,
-      CheckinStatus: "Waiting",
+      CheckinStatus: "waiting",
       PaidStatus: true,
       Status: 1,
       CreateDate: new Date().toString().substring(0, 15),
@@ -622,22 +621,26 @@ export function* upddateAppointment(action) {
     formdt.append('id', id);
     var newDate = moment(end).add(duration, 'minutes').format();
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
+    console.log(kq);
+    console.log(storeid);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    const result = update_Appointment(requestURL.toString(), {
+    console.log(action.appointment.status);
+    const result = yield update_Appointment(requestURL.toString(), {
       id,
       Staff_id: memberId,
-      StoreId: 1,
+      StoreId: storeid,
       FromTime: start,
       ToTime: newDate.substr(0, 19),
       total: total,
       duration: duration,
-      CheckinStatus: status,
+      CheckinStatus: action.appointment.status,
       PaidStatus: true,
       Status: 1,
       CreateDate: new Date().toString().substring(0, 15),
       BookingServices2: BookingServices2,
       User_id: kq.data.data.user_id,
     });
+    console.log(result);
     if (result) {
       yield put(updateAppointmentSuccess(result))
     } else {

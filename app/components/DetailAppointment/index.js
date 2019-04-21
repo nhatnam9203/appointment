@@ -355,7 +355,7 @@ class Appointment extends React.Component {
     const servicesUpdate = services.map(
       service => `${service.id}@${service.duration}@${appointment.memberId}`,
     );
-    this.updateStatus("Waiting", servicesUpdate)
+    this.updateStatus("waiting", servicesUpdate)
   }
 
   nextStatus() {
@@ -365,10 +365,10 @@ class Appointment extends React.Component {
       service => `${service.id}@${service.duration}@${appointment.memberId}`,
     );
     if (appointment.status === "CONFIRMED") {
-      this.updateStatus("CheckIn", servicesUpdate)
+      this.updateStatus("checkin", servicesUpdate)
     }
     if (appointment.status === "ASSIGNED") {
-      this.updateStatus("Confirm", servicesUpdate)
+      this.updateStatus("confirm", servicesUpdate)
     }
     if (appointment.status === "CHECKED_IN") {
       this.updateStatusPaid(appointment.id);

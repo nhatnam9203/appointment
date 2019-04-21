@@ -1,23 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { FaCaretUp, FaCaretDown } from 'react-icons/fa';
+
 import $ from 'jquery';
 import 'jquery-ui';
 
 const DragZoneWrapper = styled.div`
   height: calc(100vh - 4rem - 4rem - 4rem);
-  //overflow: hidden;
-  #waiting-events {
-    height: 100%;
-    overflow: scroll;
-    -webkit-overflow-scrolling: touch;
-  }
+  position: relative;
 `;
 
 const EventWrapper = styled.div`
   background: #f4f4f5;
   border: 1px solid #ffffff;
   color: #333333;
+`;
+
+const PrevButton = styled.div`
+  color: #3883bb;
+  font-size: 2rem;
+  line-height: 2rem;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+`;
+
+const NextButton = styled(PrevButton)`
+  position: absolute;
+  left: 0;
+  bottom: 0;
 `;
 
 function handleDrag() {
@@ -36,23 +48,72 @@ function handleDrag() {
     revert: true,
     revertDuration: 0,
   });
-
 }
 
 class FCDragZone extends React.PureComponent {
-  componentDidMount() {
-    // setInterval(() => {
-    $('#waiting-events > div').each(handleDrag);
+  state = {
+    slideIndex: 0,
+    slidesToShow: 3,
+  };
 
-    // }, 500);
+  updateDimensions() {
+    this.setState({
+      slidesToShow:
+        Math.floor(($(window).height() - 64 * 3 - 36) / 127) - 1 || 1,
+    });
+    setInterval(() => {
+      $('#waiting-events > div').each(handleDrag);
+    }, 500);
+  }
+
+  componentWillMount() {
+    this.updateDimensions();
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', () => this.updateDimensions());
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', () => this.updateDimensions());
+  }
+
+  prevSlide() {
+    const { slideIndex } = this.state;
+    if (slideIndex > 0) {
+      this.setState({
+        slideIndex: slideIndex - 1,
+      });
+    }
+  }
+
+  nextSlide() {
+    const { events } = this.props;
+    const { slideIndex, slidesToShow } = this.state;
+    if (slideIndex < Math.floor(events.length / slidesToShow)) {
+      this.setState({
+        slideIndex: slideIndex + 1,
+      });
+    }
   }
 
   render() {
     const { events } = this.props;
+    const { slideIndex, slidesToShow } = this.state;
+    const displayedEvents = events.slice(
+      slideIndex * slidesToShow,
+      slideIndex * slidesToShow + slidesToShow,
+    );
     return (
       <DragZoneWrapper>
+        <PrevButton onClick={() => this.prevSlide()}>
+          <FaCaretUp />
+        </PrevButton>
+        <NextButton onClick={() => this.nextSlide()}>
+          <FaCaretDown />
+        </NextButton>
         <div id="waiting-events">
-          {events.map(event => (
+          {displayedEvents.map(event => (
             <EventWrapper
               className="app-event"
               key={event.id}

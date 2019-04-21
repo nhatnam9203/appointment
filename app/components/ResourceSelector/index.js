@@ -197,9 +197,12 @@ class ResourceSelector extends React.Component {
     if (loading) {
       return [1].map(index => this.renderLoadingResources(index));
     }
-    return chunk(resources, 6).map((resource, index) =>
-      this.renderResources(resource, index),
-    );
+    if (resources) {
+      return chunk(resources, 6).map((resource, index) =>
+        this.renderResources(resource, index),
+      );
+    }
+    return null;
   }
 
   render() {

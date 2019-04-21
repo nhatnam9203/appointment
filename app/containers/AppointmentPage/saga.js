@@ -583,7 +583,7 @@ export function* updateStatusAppointment(action) {
       body: JSON.stringify({
         id: fcEvent.data.id,
         Staff_id: fcEvent.data.memberId,
-        StoreId: 1,
+        StoreId: storeid,
         FromTime: fcEvent.data.start,
         ToTime: fcEvent.data.end,
         TipPercent: null,
@@ -621,10 +621,7 @@ export function* upddateAppointment(action) {
     formdt.append('id', id);
     var newDate = moment(end).add(duration, 'minutes').format();
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
-    console.log(kq);
-    console.log(storeid);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    console.log(action.appointment.status);
     const result = yield update_Appointment(requestURL.toString(), {
       id,
       Staff_id: memberId,
@@ -640,7 +637,6 @@ export function* upddateAppointment(action) {
       BookingServices2: BookingServices2,
       User_id: kq.data.data.user_id,
     });
-    console.log(result);
     if (result) {
       yield put(updateAppointmentSuccess(result))
     } else {

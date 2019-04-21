@@ -98,12 +98,12 @@ const headers = {
 };
 
 const statusConvertKey = {
-  UnConfirm: 'ASSIGNED',
-  Confirm: 'CONFIRMED',
-  CheckIn: 'CHECKED_IN',
-  Paid: 'PAID',
-  Waiting: 'WAITING',
-  Cancel: 'CANCEL',
+  unconfirm: 'ASSIGNED',
+  confirm: 'CONFIRMED',
+  checkin: 'CHECKED_IN',
+  paid: 'PAID',
+  waiting: 'WAITING',
+  cancel: 'CANCEL',
 };
 
 const appointmentAdapter = appointment => {
@@ -151,12 +151,12 @@ const memberAdapter = member => ({
 });
 
 const statusConvertData = {
-  ASSIGNED: 'UnConfirm',
-  CONFIRMED: 'Confirm',
-  CHECKED_IN: 'CheckIn',
-  PAID: 'Paid',
-  WAITING: 'Waiting',
-  CANCEL: 'Cancel',
+  ASSIGNED: 'unconfirm',
+  CONFIRMED: 'confirm',
+  CHECKED_IN: 'checkin',
+  PAID: 'paid',
+  WAITING: 'waiting',
+  CANCEL: 'cancel',
 };
 
 const statusAdapter = status => statusConvertData[status];

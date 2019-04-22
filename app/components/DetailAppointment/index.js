@@ -5,7 +5,8 @@ import Popup from 'reactjs-popup';
 import moment from 'moment';
 import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
-
+import axios from 'axios'
+import {token,POST_DETAIL_APPOINTMENT} from '../../../app-constants'
 
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
@@ -211,6 +212,7 @@ class Appointment extends React.Component {
     services: [],
     products: [],
     prices: [],
+    old_total_duration : 0,
     notes: [
       {
         name: 'Rickie Da Vinci',
@@ -306,6 +308,7 @@ class Appointment extends React.Component {
     });
     return total;
   }
+
   getTotalDuration() {
     const { services } = this.state;
     let total = 0;
@@ -322,9 +325,31 @@ class Appointment extends React.Component {
 
   async componentWillReceiveProps(nextProps) {
     if (nextProps.appointment) {
-      this.setState({
+      await this.setState({
         services: nextProps.appointment.options,
       });
+      var {services} = this.state
+      let formdt = new FormData();
+      formdt.append('id',nextProps.appointment.id)
+      axios.post(POST_DETAIL_APPOINTMENT+'/id',formdt,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }).then((result) => {
+        const servicesUpdate = result.data.data.bookingServices2;
+        var old_duration  = 0;
+        for(let i = 0 ; i<services.length;i++){
+          const index = servicesUpdate[i].search('@');//find first index include @ in services string
+          services[i].duration = parseInt(servicesUpdate[i].charAt(index+1) + servicesUpdate[i].charAt(index+2));
+          old_duration += parseInt(servicesUpdate[i].charAt(index+1) + servicesUpdate[i].charAt(index+2));
+        }
+        this.setState({
+          services ,
+          old_total_duration : old_duration,
+        })
+      })
+
       await this.setState({prices : []})
       for (let i = 0; i < nextProps.appointment.options.length; i++) {
         const price = nextProps.appointment.options[i].price * (nextProps.appointment.options[i].duration / 10)
@@ -391,7 +416,8 @@ class Appointment extends React.Component {
       total: this.getTotalPrice(),
       duration: this.getTotalDuration(),
       BookingServices2: servicesUpdate,
-      status
+      status,
+      old_duration : this.state.old_total_duration
     })
   }
 
@@ -627,7 +653,7 @@ class Appointment extends React.Component {
     if (appointment.status === 'CHECKED_IN')
       return (
         <Button onClick={() => this.nextStatus()} primary="true">
-          Pay
+          Check out
         </Button>
       );
     return '';

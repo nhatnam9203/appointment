@@ -13,7 +13,8 @@ import {
   token,
   storeid
 } from '../../../app-constants';
-
+import WaitingLoading from './WaitingLoading'
+import CalendarLoading from './CalendarLoading'
 
 
 const CalendarWrapper = styled.div`
@@ -76,7 +77,7 @@ class Calendar extends React.Component {
       alert('update calendar');
         break;
       case 'waitinglist':
-        this.checkWaiting5s(this.props.waitingAppointments)
+      this.props.loadWaitingAppointments();
         break;
       default:
         break;
@@ -84,60 +85,61 @@ class Calendar extends React.Component {
   }
 
   // FIXME: This is hard code for real-time calendar
-  componentDidMount() {
-    // const { updateCalendarInterval } = this.props;
-    // setInterval(() => {
-    //   updateCalendarInterval();
-    //   // this.checkWaiting5s(this.props.waitingAppointments)
-    // }, 8000);
-  }
+  // componentDidMount() {
+  //   const { updateCalendarInterval } = this.props;
+  //   setInterval(() => {
+  //     updateCalendarInterval();
+  //     // this.checkWaiting5s(this.props.waitingAppointments)
+  //   }, 8000);
+  // }
 
+  // checkWaiting5s = (waitingAppointments) => {
+  //   alert('check Waiting5s');
+  //   var apiWaitingListStatusQuery = 'waiting';
+  //   var requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
+  //   var currentDate = this.props.currentDay;
+  //   // Query params for this api
+  //   var apiDateQuery =
+  //     currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
 
+  //   var formDataWaitingListReload = new FormData();
+  //   formDataWaitingListReload.set('date', apiDateQuery);
+  //   formDataWaitingListReload.set('storeid', storeid);
+  //   formDataWaitingListReload.set('status', apiWaitingListStatusQuery);
 
-  checkWaiting5s = (waitingAppointments) => {
-    alert('check Waiting5s');
-    var apiWaitingListStatusQuery = 'waiting';
-    var requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
-    var currentDate = this.props.currentDay;
-    // Query params for this api
-    var apiDateQuery =
-      currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
-
-    var formDataWaitingListReload = new FormData();
-    formDataWaitingListReload.set('date', apiDateQuery);
-    formDataWaitingListReload.set('storeid', storeid);
-    formDataWaitingListReload.set('status', apiWaitingListStatusQuery);
-
-    axios.post(requestURL, formDataWaitingListReload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    }).then(result => {
-      const WaitingList = result.data.data;
-      if(waitingAppointments){
-        if((WaitingList.length > waitingAppointments.length)){
-          this.props.loadWaitingAppointments();
-        }
-      }
-      if(!waitingAppointments){
-        this.props.loadWaitingAppointments();
-      }
-    })
-  }
+  //   axios.post(requestURL, formDataWaitingListReload, {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //       'Content-Type': 'multipart/form-data'
+  //     }
+  //   }).then(result => {
+  //     const WaitingList = result.data.data;
+  //     if(waitingAppointments){
+  //       if((WaitingList.length > waitingAppointments.length)){
+  //         this.props.loadWaitingAppointments();
+  //       }
+  //     }
+  //     if(!waitingAppointments){
+  //       this.props.loadWaitingAppointments();
+  //     }
+  //   })
+  // }
 
   render() {
     const {
       waitingAppointments,
       waitingIndex,
       openAddingAppointment,
+      calendarMembers,
     } = this.props;
     return (
       <CalendarWrapper>
         <MainCalendar>
+         {calendarMembers.length === 0 && <CalendarLoading />}
           <FCAgenda options={MAIN_CALENDAR_OPTIONS} />
         </MainCalendar>
         <RightSideBar id="drag-zone">
+        {waitingAppointments.length === 0 && <WaitingLoading />}
           {!!waitingAppointments && !!waitingAppointments.length ? (
             <FCDragZone events={waitingAppointments} index={waitingIndex} />
           ) : (

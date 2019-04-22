@@ -232,10 +232,11 @@ class Appointment extends React.Component {
       const { services, prices } = state;
       if (services[index].duration >= 10) {
         services[index].duration -= 10;
-        prices[index] = (services[index].price * (services[index].duration / 10))
+        // prices[index] = (services[index].price * (services[index].duration / 10))
       }
       return {
-        services, prices
+        services,
+        //  prices
       };
     });
   }
@@ -244,10 +245,10 @@ class Appointment extends React.Component {
     this.setState(state => {
       const { services, prices } = state;
       services[index].duration += 10;
-      prices[index] = (services[index].price * (services[index].duration / 10))
+      // prices[index] = (services[index].price * (services[index].duration / 10))
       return {
         services,
-        prices
+        // prices
       };
     });
   }
@@ -398,7 +399,8 @@ class Appointment extends React.Component {
     if (appointment.status === "CHECKED_IN") {
       this.updateStatusPaid(appointment.id);
     }
-    nextStatus(appointment.id, servicesUpdate);
+    this.closeModal();
+    // nextStatus(appointment.id, servicesUpdate);
   }
 
   updateStatusPaid = (idAppointment) => {

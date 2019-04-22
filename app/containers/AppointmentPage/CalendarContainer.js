@@ -13,7 +13,8 @@ import {
 import {
   makeSelectWaitingAppointments,
   makeSelectWaitingIndexAppointments,
-  makeCurrentDay
+  makeCurrentDay,
+  makeSelectCalendarAppointments,
 } from './selectors';
 
 export function mapDispatchToProps(dispatch) {
@@ -29,6 +30,7 @@ const mapStateToProps = createStructuredSelector({
   waitingAppointments: makeSelectWaitingAppointments(),
   currentDay: makeCurrentDay(),
   waitingIndex: makeSelectWaitingIndexAppointments(),
+  calendarMembers: makeSelectCalendarAppointments(),
 });
 
 const withConnect = connect(

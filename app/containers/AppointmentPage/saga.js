@@ -621,7 +621,7 @@ export function* upddateAppointment(action) {
     formdt.append('id', id);
     var newDate;
     //status to update
-    if (status === 'checkin') {
+    if (status === 'checkin' || status === 'confirm') {
       if(parseInt(old_duration) > parseInt(duration)){
         const newDuration = parseInt(old_duration) - parseInt(duration);
         newDate = moment(end).subtract(newDuration, 'minutes').format();

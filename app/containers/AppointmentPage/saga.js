@@ -172,7 +172,7 @@ export function* getMembers() {
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
-   
+
     const requestURL = new URL(`${GET_MEMBERS_API}/${storeid}`);
     const response = yield call(request, requestURL.toString(), {
       method: 'POST',
@@ -615,11 +615,23 @@ export function* updateStatusAppointment(action) {
 
 export function* upddateAppointment(action) {
   try {
-    const { appointment, total, duration, BookingServices2, status } = action.appointment;
+    const { appointment, total, duration, BookingServices2, status,old_duration } = action.appointment;
     const { memberId, start, end, id } = appointment;
     let formdt = new FormData();
     formdt.append('id', id);
-    var newDate = moment(end).add(duration, 'minutes').format();
+    var newDate;
+    //status to update
+    if (status === 'checkin') {
+      if(parseInt(old_duration) > parseInt(duration)){
+        const newDuration = parseInt(old_duration) - parseInt(duration);
+        newDate = moment(end).subtract(newDuration, 'minutes').format();
+      }else{
+        const newDuration = parseInt(duration) - parseInt(old_duration);
+        newDate = moment(end).add(newDuration, 'minutes').format();
+      }
+    } else {
+      newDate = moment(end).add(duration, 'minutes').format();
+    }
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = yield update_Appointment(requestURL.toString(), {

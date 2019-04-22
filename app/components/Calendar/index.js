@@ -58,9 +58,28 @@ SignInWrapper.Button = styled.div`
 `;
 
 class Calendar extends React.Component {
+
+  constructor(){
+    super();
+    window.Calendar = this;
+  }
+
   componentWillMount() {
     const { loadWaitingAppointments } = this.props;
     loadWaitingAppointments();
+  }
+
+  reloadComponent = (section) => {
+    switch (section) {
+      case 'calendar':
+      this.props.updateCalendarInterval();
+        break;
+      case 'waitinglist':
+        this.checkWaiting5s(this.props.waitingAppointments)
+        break;
+      default:
+        break;
+    }
   }
 
   // FIXME: This is hard code for real-time calendar
@@ -71,11 +90,13 @@ class Calendar extends React.Component {
       // this.checkWaiting5s(this.props.waitingAppointments)
     }, 8000);
   }
+
+
+
   checkWaiting5s = (waitingAppointments) => {
-    
+    console.log('123123123');
     var apiWaitingListStatusQuery = 'waiting';
     var requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
-
     var currentDate = this.props.currentDay;
     // Query params for this api
     var apiDateQuery =

@@ -73,6 +73,7 @@ class Calendar extends React.Component {
     switch (section) {
       case 'calendar':
       this.props.updateCalendarInterval();
+      alert('update calendar');
         break;
       case 'waitinglist':
         this.checkWaiting5s(this.props.waitingAppointments)
@@ -84,16 +85,17 @@ class Calendar extends React.Component {
 
   // FIXME: This is hard code for real-time calendar
   componentDidMount() {
-    const { updateCalendarInterval } = this.props;
-    setInterval(() => {
-      updateCalendarInterval();
-      // this.checkWaiting5s(this.props.waitingAppointments)
-    }, 8000);
+    // const { updateCalendarInterval } = this.props;
+    // setInterval(() => {
+    //   updateCalendarInterval();
+    //   // this.checkWaiting5s(this.props.waitingAppointments)
+    // }, 8000);
   }
 
 
 
   checkWaiting5s = (waitingAppointments) => {
+    alert('check Waiting5s');
     var apiWaitingListStatusQuery = 'waiting';
     var requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
     var currentDate = this.props.currentDay;

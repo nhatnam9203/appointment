@@ -94,7 +94,6 @@ class Calendar extends React.Component {
 
 
   checkWaiting5s = (waitingAppointments) => {
-    console.log('123123123');
     var apiWaitingListStatusQuery = 'waiting';
     var requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
     var currentDate = this.props.currentDay;

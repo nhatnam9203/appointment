@@ -40,6 +40,9 @@ import {
   CHECK_PHONE_ADD_CUSTOMER_ERROR,
   ADD_CUSTOMER_SUCCESS,
   DISABLE_CALENDAR,
+  UPDATE_APPOINTMENT_FRONTEND,
+  LOADING_WAITING,
+  LOADING_CALENDAR
 } from './constants';
 
 const initialCurrentDay = moment();
@@ -77,7 +80,9 @@ export const initialState = fromJS({
   checkPhoneNumber_error: false,
   addCustomer_success: false,
   addCustomer_error: false,
-  disable_Calendar : false
+  disable_Calendar: false,
+  isLoadingWaiting: false,
+  isLoadingCalendar: false
 });
 
 function appointmentReducer(state = initialState, action) {
@@ -239,6 +244,7 @@ function appointmentReducer(state = initialState, action) {
       });
 
     case UPDATE_STATUS_APPOINTMENT_SUCCESS:
+      
       return state.updateIn(['appointments', 'calendar'], arr => {
         const member = arr.find(mem =>
           mem.appointments.find(app => app.id === action.appointmentId),
@@ -252,6 +258,9 @@ function appointmentReducer(state = initialState, action) {
 
         const { status } = member.appointments[appointmentIndex];
         if (status === 'ASSIGNED') {
+          member.appointments[appointmentIndex].status = 'CHECKED_IN';
+        }
+        if (status === 'UNCONFIRMED') {
           member.appointments[appointmentIndex].status = 'CONFIRMED';
         }
         if (status === 'CONFIRMED') {
@@ -267,7 +276,7 @@ function appointmentReducer(state = initialState, action) {
     case UPDATE_WAITING_APPOINTMENT:
 
       return state.updateIn(['appointments', 'waiting'], arr => {
-      
+
         return [...arr];
       });
 
@@ -281,7 +290,12 @@ function appointmentReducer(state = initialState, action) {
       return state.set('addCustomer_success', action.customer);
 
     case DISABLE_CALENDAR:
-      return state.set('disable_Calendar',action.status);
+      return state.set('disable_Calendar', action.status);
+
+    case LOADING_WAITING:
+      return state.set('isLoadingWaiting', action.status);
+    case LOADING_CALENDAR:
+      return state.set('isLoadingCalendar', action.status);
 
     default:
       return state;

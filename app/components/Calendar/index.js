@@ -15,6 +15,7 @@ import {
 } from '../../../app-constants';
 import WaitingLoading from './WaitingLoading'
 import CalendarLoading from './CalendarLoading'
+import { loadingWaiting } from '../../containers/AppointmentPage/actions';
 
 
 const CalendarWrapper = styled.div`
@@ -66,8 +67,9 @@ class Calendar extends React.Component {
   }
 
   componentWillMount() {
-    const { loadWaitingAppointments } = this.props;
+    const { loadWaitingAppointments,loadingWaiting } = this.props;
     loadWaitingAppointments();
+    loadingWaiting(true);
   }
 
   reloadComponent = (section) => {
@@ -89,8 +91,11 @@ class Calendar extends React.Component {
       waitingIndex,
       openAddingAppointment,
       calendarMembers,
-      disableCalendar
+      disableCalendar,
+      isLoadWaiting,
+      isLoadCalendar
     } = this.props;
+    console.log(isLoadCalendar)
     return (
       <CalendarWrapper>
         <MainCalendar>
@@ -100,7 +105,7 @@ class Calendar extends React.Component {
           options={MAIN_CALENDAR_OPTIONS} />
         </MainCalendar>
         <RightSideBar id="drag-zone">
-        {waitingAppointments.length === 0 && <WaitingLoading />}
+        {isLoadWaiting === true && <WaitingLoading />}
           {!!waitingAppointments && !!waitingAppointments.length ? (
             <FCDragZone events={waitingAppointments} index={waitingIndex} />
           ) : (

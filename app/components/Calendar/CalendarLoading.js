@@ -6,9 +6,7 @@ const LoadingCalendar = styled.div`
     width: 100%;
     height: 100%;
     display: block;
-    background: #fff;
     z-index: 99;
-    opacity: 0.9;
     padding-top: 20%;
     text-align: center;
     font-weight: bold;
@@ -22,7 +20,7 @@ export default class CalendarLoading extends Component {
   render() {
     return (
      <LoadingCalendar>
-         ...Loading Calendar
+         <img src={require('../../images/loading.gif')} alt=""/>
      </LoadingCalendar>
     )
   }

@@ -50,9 +50,6 @@ export const MAIN_CALENDAR_OPTIONS = {
 
   
   eventClick: event => {
-    // alert('Event: ' + event.event.title);
-    // alert('Coordinates: ' + event.jsEvent.pageX + ',' + event.jsEvent.pageY);
-    // alert('View: ' + event.view.type);
     const displayedMembers = store
       .getState()
       .getIn(['appointment', 'appointments', 'calendar']);

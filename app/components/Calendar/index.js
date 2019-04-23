@@ -83,47 +83,6 @@ class Calendar extends React.Component {
     }
   }
 
-  // FIXME: This is hard code for real-time calendar
-  // componentDidMount() {
-  //   const { updateCalendarInterval } = this.props;
-  //   setInterval(() => {
-  //     updateCalendarInterval();
-  //     // this.checkWaiting5s(this.props.waitingAppointments)
-  //   }, 8000);
-  // }
-
-  // checkWaiting5s = (waitingAppointments) => {
-  //   alert('check Waiting5s');
-  //   var apiWaitingListStatusQuery = 'waiting';
-  //   var requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
-  //   var currentDate = this.props.currentDay;
-  //   // Query params for this api
-  //   var apiDateQuery =
-  //     currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
-
-  //   var formDataWaitingListReload = new FormData();
-  //   formDataWaitingListReload.set('date', apiDateQuery);
-  //   formDataWaitingListReload.set('storeid', storeid);
-  //   formDataWaitingListReload.set('status', apiWaitingListStatusQuery);
-
-  //   axios.post(requestURL, formDataWaitingListReload, {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //       'Content-Type': 'multipart/form-data'
-  //     }
-  //   }).then(result => {
-  //     const WaitingList = result.data.data;
-  //     if(waitingAppointments){
-  //       if((WaitingList.length > waitingAppointments.length)){
-  //         this.props.loadWaitingAppointments();
-  //       }
-  //     }
-  //     if(!waitingAppointments){
-  //       this.props.loadWaitingAppointments();
-  //     }
-  //   })
-  // }
-
   render() {
     const {
       waitingAppointments,
@@ -132,7 +91,6 @@ class Calendar extends React.Component {
       calendarMembers,
       disableCalendar
     } = this.props;
-    console.log(disableCalendar);
     return (
       <CalendarWrapper>
         <MainCalendar>

@@ -34,7 +34,7 @@ export const MAIN_CALENDAR_OPTIONS = {
   allDaySlot: false,
   nowIndicator: true,
   selectable : true,
-  // slotLabelFormat: 'hh:mm ',
+  slotLabelFormat: 'hh:mm A',
   slotDuration: '00:15:00',
   // defaultTimedEventDuration: '01:30:00',
   eventOverlap: false,

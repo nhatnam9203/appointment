@@ -520,11 +520,11 @@ class Appointment extends React.Component {
         <td>{service.name}</td>
         <td style={{ textAlign: 'center' }}>
           <AdjustButton
-            active={appointment.status !== 'PAID' && service.duration > 10}
-            disabled={appointment.status === 'PAID' || service.duration <= 10}
+            active={appointment.status !== 'PAID' && service.duration > 15}
+            disabled={appointment.status === 'PAID' || service.duration <= 15}
             onClick={() => this.subtractService(index)}
           >
-            -10&#39;
+            -15&#39;
           </AdjustButton>
           {service.duration}
           <AdjustButton
@@ -532,7 +532,7 @@ class Appointment extends React.Component {
             disabled={appointment.status === 'PAID' || service.duration >= 90}
             onClick={() => this.addService(index)}
           >
-            +10&#39;
+            +15&#39;
           </AdjustButton>
         </td>
         <td style={{ textAlign: 'center' }}>

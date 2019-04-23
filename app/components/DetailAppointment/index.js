@@ -427,6 +427,10 @@ class Appointment extends React.Component {
 
   renderHeader() {
     const { appointment } = this.props;
+
+    console.log("renderHeader");
+    console.log(appointment);
+
     if (appointment.status === 'ASSIGNED') {
       return (
         <AppointmentWrapper.Header backgroundColor="#ffe400">

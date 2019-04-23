@@ -617,7 +617,7 @@ export function* upddateAppointment(action) {
       newDate = moment(end).add(duration, 'minutes').format();
     }
     yield put(appointmentUpdatedStatus(appointment.id));
-    yield put(updateEventFromCalendar(fcEvent));
+    updateEventFromCalendar(fcEvent);
 
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
@@ -735,14 +735,14 @@ export function* appointmentsByMembersData() {
     LOAD_APPOINTMENTS_BY_MEMBERS,
     getAppointmentsByMembersAndDate,
   );
-  yield takeLatest(
-    UPDATE_STATUS_APPOINTMENT_SUCCESS,
-    getAppointmentsByMembersAndDate,
-  );
+  // yield takeLatest(
+  //   UPDATE_STATUS_APPOINTMENT_SUCCESS,
+  //   getAppointmentsByMembersAndDate,
+  // );
   yield takeLatest(SELECT_DAY, getAppointmentsByMembersAndDate);
 
   // FIXME: This is hard code for real-time calendar
-  yield takeLatest(UPDATE_CALENDAR_INTERVAL, getAppointmentsByMembersAndDate);
+  // yield takeLatest(UPDATE_CALENDAR_INTERVAL, getAppointmentsByMembersAndDate);
 }
 
 export function* displayedMembersData() {

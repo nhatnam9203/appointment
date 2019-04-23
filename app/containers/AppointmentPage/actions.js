@@ -60,6 +60,8 @@ import {
   UPDATE_APPOINTMENT_STATUS_SUCCESS,
   UPDATE_APPOINTMENT_STATUS_ERROR,
   DISABLE_CALENDAR,
+  LOADING_CALENDAR,
+  LOADING_WAITING,
 } from './constants';
 
 /**
@@ -524,6 +526,17 @@ export const updateAppointmentError = (error) => ({
 export const disableCalendar = (status) => ({
   type: DISABLE_CALENDAR,
   status
+});
+export const loadingWaiting = (status) => ({
+  type: LOADING_WAITING,
+  status
+});
+export const loadingCalendar = (status) => ({
+  type: LOADING_CALENDAR,
+  status
 })
+
+
+
 
 

@@ -7,7 +7,6 @@ class FCAgenda extends React.Component {
   componentDidMount() {
     const { options } = this.props;
     $('#full-calendar').fullCalendar(options);
-
     setInterval(() => {
       $('.fc-now-indicator-arrow').html(moment().format('HH:mm'));
     }, 500);
@@ -15,7 +14,6 @@ class FCAgenda extends React.Component {
 
   render() {
     const {disableCalendar} = this.props;
-    console.log(disableCalendar)
     return <div id="full-calendar" style={{ pointerEvents: disableCalendar === true ? 'none' : 'auto' }}/>;
   }
 }

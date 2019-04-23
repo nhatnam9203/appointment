@@ -86,6 +86,16 @@ const makeDisableCalendar = () =>
     appointmentState.get('disable_Calendar'),
   );
 
+  const makeLoadWaiting = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('isLoadingWaiting'),
+  );
+
+  const makeLoadCalendar = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('isLoadingCalendar'),
+  );
+
 export {
   currentAppointment,
   makeCurrentDay,
@@ -103,5 +113,7 @@ export {
   makeCheckPhoneSuccess,
   makeCheckPhoneError,
   makeAddCustomerSuccess,
-  makeDisableCalendar
+  makeDisableCalendar,
+  makeLoadWaiting,
+  makeLoadCalendar,
 };

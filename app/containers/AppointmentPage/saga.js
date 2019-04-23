@@ -53,6 +53,9 @@ import {
   checkPhoneNumberCustomer,
   checkPhoneNumberCustomerSuccess,
   checkPhoneNumberCustomerError,
+  loadWaitingAppointments,
+  loadingWaiting,
+  loadingCalendar,
 } from './actions';
 import {
   makeCurrentDay,
@@ -208,10 +211,7 @@ export function* getWaitingAppointments() {
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
     const requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
-    // requestURL.searchParams.append('status', apiWaitingListStatusQuery);
     const currentDate = yield select(makeCurrentDay());
-
-    // Query params for this api
     const apiDateQuery =
       currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
 
@@ -227,13 +227,14 @@ export function* getWaitingAppointments() {
       },
       body: formDataWaitingListSaga
     });
+    if(response){
+      yield put(loadingWaiting(false))
+    }
 
     const appointments =
       response &&
       response.data &&
       response.data.map(appointment => appointmentAdapter(appointment));
-    /* --------------------------------------------------------------- */
-    /* --------------------------------------------------------------- */
     yield put(waitingAppointmentsLoaded(appointments));
   } catch (err) {
     yield put(waitingAppointmentLoadingError(err));
@@ -241,29 +242,14 @@ export function* getWaitingAppointments() {
 }
 
 export function* getAppointmentsByMembersAndDate() {
-
+  loadingCalendar(true);
   const displayedMembers = yield select(makeSelectDisplayedMembers());
   const currentDate = yield select(makeCurrentDay());
-
-  // Query params for this api
   let apiDateQuery =
     currentDate.format('YYYY-MM-DD') || moment().format('YYYY-MM-DD');
   const apiMemberIdsQuery = displayedMembers.map(member => member.id);
   try {
-    /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    // yield delay(200);
-    // const appointments = mockedAppointments.filter(
-    //   app =>
-    //     app.start &&
-    //     app.start.startsWith(apiDateQuery) &&
-    //     apiMemberIdsQuery.includes(app.memberId),
-    // );
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
 
-    /* ------------------ REAL DATA FROM API BLOCK ------------------- */
-    /* --------------------------------------------------------------- */
     const requestURL = new URL(GET_APPOINTMENTS_BY_MEMBERS_DATE_API);
     const requestBody = JSON.stringify({
       date: apiDateQuery,
@@ -275,13 +261,15 @@ export function* getAppointmentsByMembersAndDate() {
       headers,
       body: requestBody,
     });
+    if(response){
+      loadingCalendar(false)
+    }
 
     const appointments =
       response &&
       response.data &&
       response.data.map(appointment => appointmentAdapter(appointment));
 
-      console.log(appointments)
     /* --------------------------------------------------------------- */
     /* --------------------------------------------------------------- */
     const appointmentsMembers = displayedMembers.map(member => ({
@@ -306,31 +294,20 @@ export function* assignAppointment(action) {
     ...action.eventData,
     memberId: assignedMember.id,
   };
-
   try {
-    /* |||||||||||||||||||||| MOCKED DATA BLOCK |||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    // yield delay(200);
-    // const result = mockedPostAppointment;
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-    /* ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-
-    /* ------------------ REAL DATA FROM API BLOCK ------------------- */
-    /* --------------------------------------------------------------- */
     const { id, memberId, start, end } = appointment;
     let formdt = new FormData();
     formdt.append('id', id)
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
-    console.log(kq);
     var totalduration = 0;
     const servicesUpdate = kq.data.data.bookingServices2;
-    for(let i = 0 ; i<servicesUpdate.length;i++){
+    for (let i = 0; i < servicesUpdate.length; i++) {
       const index = servicesUpdate[i].search('@');
-      totalduration += parseInt(servicesUpdate[i].charAt(index+1) + servicesUpdate[i].charAt(index+2));
+      totalduration += parseInt(servicesUpdate[i].charAt(index + 1) + servicesUpdate[i].charAt(index + 2));
     }
-
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    const result = drag_Appointment(requestURL.toString(), {
+    put(loadWaitingAppointments());
+    const result = yield drag_Appointment(requestURL.toString(), {
       id,
       Staff_id: memberId,
       StoreId: storeid,
@@ -345,14 +322,6 @@ export function* assignAppointment(action) {
       User_id: kq.data.data.user_id
     });
 
-    // const requestURL = new URL(POST_ASSIGN_APPOINTMENT_API);
-    // const formData = new FormData();
-    // formData.append('FromTime', appointment.start);
-    // formData.append('staff_id', appointment.memberId);
-    // formData.append('appointment_id', appointment.id);
-    // const result = dragAppointment(requestURL.toString(), formData);
-    /* --------------------------------------------------------------- */
-    /* --------------------------------------------------------------- */
     if (result) {
       yield put(appointmentAssigned(appointment));
     } else {
@@ -625,23 +594,31 @@ export function* updateStatusAppointment(action) {
 
 export function* upddateAppointment(action) {
   try {
-    const { appointment, total, duration, BookingServices2, status,old_duration } = action.appointment;
+    const fcEvent = yield select(makeSelectFCEvent());
+    if (!fcEvent) {
+      yield put(appointmentUpdatingStatusError('Cannot find selected fcEvent'));
+    }
+
+    const { appointment, total, duration, BookingServices2, status, old_duration } = action.appointment;
     const { memberId, start, end, id } = appointment;
     let formdt = new FormData();
     formdt.append('id', id);
     var newDate;
     //status to update
     if (status === 'checkin' || status === 'confirm') {
-      if(parseInt(old_duration) > parseInt(duration)){
+      if (parseInt(old_duration) > parseInt(duration)) {
         const newDuration = parseInt(old_duration) - parseInt(duration);
         newDate = moment(end).subtract(newDuration, 'minutes').format();
-      }else{
+      } else {
         const newDuration = parseInt(duration) - parseInt(old_duration);
         newDate = moment(end).add(newDuration, 'minutes').format();
       }
     } else {
       newDate = moment(end).add(duration, 'minutes').format();
     }
+    yield put(appointmentUpdatedStatus(appointment.id));
+    yield put(updateEventFromCalendar(fcEvent));
+
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = yield update_Appointment(requestURL.toString(), {
@@ -669,6 +646,7 @@ export function* upddateAppointment(action) {
     yield put(updateAppointmentError(error))
   }
 }
+
 
 export function* addNewCustomer(action) {
   try {

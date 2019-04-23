@@ -173,7 +173,7 @@ export const MAIN_CALENDAR_OPTIONS = {
           const eventInformation = $(this).data('event-information');
           $(this).data('event', {
             data: eventInformation,
-            color: '#ffe400',
+            color: '#00b4f7',
             stick: true,
           });
 

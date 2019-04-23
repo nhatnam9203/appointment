@@ -74,7 +74,6 @@ class Calendar extends React.Component {
     switch (section) {
       case 'calendar':
       this.props.updateCalendarInterval();
-      alert('update calendar');
         break;
       case 'waitinglist':
       this.props.loadWaitingAppointments();
@@ -131,12 +130,16 @@ class Calendar extends React.Component {
       waitingIndex,
       openAddingAppointment,
       calendarMembers,
+      disableCalendar
     } = this.props;
+    console.log(disableCalendar);
     return (
       <CalendarWrapper>
         <MainCalendar>
          {calendarMembers.length === 0 && <CalendarLoading />}
-          <FCAgenda options={MAIN_CALENDAR_OPTIONS} />
+          <FCAgenda 
+          disableCalendar={disableCalendar}
+          options={MAIN_CALENDAR_OPTIONS} />
         </MainCalendar>
         <RightSideBar id="drag-zone">
         {waitingAppointments.length === 0 && <WaitingLoading />}

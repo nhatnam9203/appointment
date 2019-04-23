@@ -280,12 +280,14 @@ export function* getAppointmentsByMembersAndDate() {
       response &&
       response.data &&
       response.data.map(appointment => appointmentAdapter(appointment));
+
+      console.log(appointments)
     /* --------------------------------------------------------------- */
     /* --------------------------------------------------------------- */
     const appointmentsMembers = displayedMembers.map(member => ({
       memberId: member.id,
       appointments: appointments.filter(
-        appointment => appointment.memberId === member.id && appointment.status !== 'WAITING',
+        appointment => appointment.memberId === member.id && appointment.status !== 'CANCEL',
       ),
     }));
 
@@ -319,13 +321,21 @@ export function* assignAppointment(action) {
     let formdt = new FormData();
     formdt.append('id', id)
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
+    console.log(kq);
+    var totalduration = 0;
+    const servicesUpdate = kq.data.data.bookingServices2;
+    for(let i = 0 ; i<servicesUpdate.length;i++){
+      const index = servicesUpdate[i].search('@');
+      totalduration += parseInt(servicesUpdate[i].charAt(index+1) + servicesUpdate[i].charAt(index+2));
+    }
+
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = drag_Appointment(requestURL.toString(), {
       id,
       Staff_id: memberId,
       StoreId: storeid,
       FromTime: start,
-      ToTime: moment(end).add(60, 'minutes').format().substr(0, 19),
+      ToTime: moment(start).add(totalduration, 'minutes').format().substr(0, 19),
       total: 0,
       duration: 0,
       CheckinStatus: "checkin",

@@ -15,6 +15,7 @@ import {
   makeSelectWaitingIndexAppointments,
   makeCurrentDay,
   makeSelectCalendarAppointments,
+  makeDisableCalendar,
 } from './selectors';
 
 export function mapDispatchToProps(dispatch) {
@@ -31,6 +32,7 @@ const mapStateToProps = createStructuredSelector({
   currentDay: makeCurrentDay(),
   waitingIndex: makeSelectWaitingIndexAppointments(),
   calendarMembers: makeSelectCalendarAppointments(),
+  disableCalendar : makeDisableCalendar(),
 });
 
 const withConnect = connect(

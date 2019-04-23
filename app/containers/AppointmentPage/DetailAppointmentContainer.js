@@ -9,7 +9,8 @@ import {
   cancelAppointment,
   deselectAppointment,
   updateStatusAppointment,
-  updateAppointment
+  updateAppointment,
+  disableCalendar
 } from './actions';
 
 export function mapDispatchToProps(dispatch) {
@@ -20,7 +21,8 @@ export function mapDispatchToProps(dispatch) {
       dispatch(updateStatusAppointment(id, services)),
     updateAppointment:(appointment)=>{
       dispatch(updateAppointment(appointment))
-    }
+    },
+    disableCalendar:(status)=>dispatch(disableCalendar(status))
   };
 }
 

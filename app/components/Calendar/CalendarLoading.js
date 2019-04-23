@@ -14,7 +14,7 @@ const LoadingCalendar = styled.div`
     font-weight: bold;
     font-style: italic;
     color: #61859f;
-    font-size: 26px;
+    font-size: 24px;
 `
 
 

@@ -67,18 +67,23 @@ const makeSelectFCEvent = () =>
     appointmentState.get('selectedFCEvent'),
   );
 
-  const makeCheckPhoneSuccess = () =>
+const makeCheckPhoneSuccess = () =>
   createSelector(currentAppointment, appointmentState =>
     appointmentState.get('checkPhoneNumber_success'),
   );
 
-  const makeCheckPhoneError = () =>
+const makeCheckPhoneError = () =>
   createSelector(currentAppointment, appointmentState =>
     appointmentState.get('checkPhoneNumber_error'),
   );
-  const makeAddCustomerSuccess = () =>
+const makeAddCustomerSuccess = () =>
   createSelector(currentAppointment, appointmentState =>
     appointmentState.get('addCustomer_success'),
+  );
+
+const makeDisableCalendar = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('disable_Calendar'),
   );
 
 export {
@@ -97,5 +102,6 @@ export {
   makeAddingAppointment,
   makeCheckPhoneSuccess,
   makeCheckPhoneError,
-  makeAddCustomerSuccess
+  makeAddCustomerSuccess,
+  makeDisableCalendar
 };

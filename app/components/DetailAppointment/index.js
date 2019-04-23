@@ -230,12 +230,13 @@ class Appointment extends React.Component {
   subtractService(index) {
     this.setState(state => {
       const { services, prices } = state;
-      if (services[index].duration >= 10) {
-        services[index].duration -= 10;
-        prices[index] = (services[index].price * (services[index].duration / 10))
+      if (services[index].duration >= 15) {
+        services[index].duration -= 15;
+        // prices[index] = (services[index].price * (services[index].duration / 10))
       }
       return {
-        services, prices
+        services,
+        //  prices
       };
     });
   }
@@ -243,11 +244,11 @@ class Appointment extends React.Component {
   addService(index) {
     this.setState(state => {
       const { services, prices } = state;
-      services[index].duration += 10;
-      prices[index] = (services[index].price * (services[index].duration / 10))
+      services[index].duration += 15;
+      // prices[index] = (services[index].price * (services[index].duration / 10))
       return {
         services,
-        prices
+        // prices
       };
     });
   }
@@ -319,8 +320,9 @@ class Appointment extends React.Component {
   }
 
   closeModal() {
-    const { deselectAppointment } = this.props;
+    const { deselectAppointment,disableCalendar } = this.props;
     deselectAppointment();
+    disableCalendar(false);
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -374,13 +376,14 @@ class Appointment extends React.Component {
 
   confirmCancelAppointment() {
     this.closeConfirmationModal();
-    const { appointment, cancelAppointment } = this.props;
+    const { appointment, cancelAppointment,disableCalendar } = this.props;
     const { services } = this.state;
     cancelAppointment(appointment.id);
     const servicesUpdate = services.map(
       service => `${service.id}@${service.duration}@${appointment.memberId}`,
     );
-    this.updateStatus("waiting", servicesUpdate)
+    this.updateStatus("cancel", servicesUpdate);
+    disableCalendar(false);
   }
 
   nextStatus() {
@@ -398,7 +401,8 @@ class Appointment extends React.Component {
     if (appointment.status === "CHECKED_IN") {
       this.updateStatusPaid(appointment.id);
     }
-    nextStatus(appointment.id, servicesUpdate);
+    this.closeModal();
+    // nextStatus(appointment.id, servicesUpdate);
   }
 
   updateStatusPaid = (idAppointment) => {

@@ -14,7 +14,9 @@ class FCAgenda extends React.Component {
   }
 
   render() {
-    return <div id="full-calendar" />;
+    const {disableCalendar} = this.props;
+    console.log(disableCalendar)
+    return <div id="full-calendar" style={{ pointerEvents: disableCalendar === true ? 'none' : 'auto' }}/>;
   }
 }
 

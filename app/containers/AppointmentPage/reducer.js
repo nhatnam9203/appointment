@@ -39,6 +39,7 @@ import {
   CHECK_PHONE_ADD_CUSTOMER_SUCCESS,
   CHECK_PHONE_ADD_CUSTOMER_ERROR,
   ADD_CUSTOMER_SUCCESS,
+  DISABLE_CALENDAR,
 } from './constants';
 
 const initialCurrentDay = moment();
@@ -76,6 +77,7 @@ export const initialState = fromJS({
   checkPhoneNumber_error: false,
   addCustomer_success: false,
   addCustomer_error: false,
+  disable_Calendar : false
 });
 
 function appointmentReducer(state = initialState, action) {
@@ -277,6 +279,9 @@ function appointmentReducer(state = initialState, action) {
 
     case ADD_CUSTOMER_SUCCESS:
       return state.set('addCustomer_success', action.customer);
+
+    case DISABLE_CALENDAR:
+      return state.set('disable_Calendar',action.status);
 
     default:
       return state;

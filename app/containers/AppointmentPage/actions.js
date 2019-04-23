@@ -59,6 +59,7 @@ import {
   UPDATE_APPOINTMENT_STATUS,
   UPDATE_APPOINTMENT_STATUS_SUCCESS,
   UPDATE_APPOINTMENT_STATUS_ERROR,
+  DISABLE_CALENDAR,
 } from './constants';
 
 /**
@@ -518,5 +519,11 @@ export const updateAppointmentSuccess = (appointment) => ({
 export const updateAppointmentError = (error) => ({
   type: UPDATE_APPOINTMENT_STATUS_ERROR,
   error
+});
+
+export const disableCalendar = (status) => ({
+  type: DISABLE_CALENDAR,
+  status
 })
+
 

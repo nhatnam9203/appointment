@@ -616,9 +616,9 @@ export function* upddateAppointment(action) {
     } else {
       newDate = moment(end).add(duration, 'minutes').format();
     }
-    appointmentUpdatedStatus(appointment.id);
-    updateEventFromCalendar(fcEvent);
-    // yield put(appointmentUpdatedStatus(appointment.id))
+    yield put(appointmentUpdatedStatus(appointment.id));
+    yield put(updateEventFromCalendar(fcEvent));
+
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = yield update_Appointment(requestURL.toString(), {
@@ -647,62 +647,6 @@ export function* upddateAppointment(action) {
   }
 }
 
-// export function* upddateAppointment(action) {
-
-//   const fcEvent = yield select(makeSelectFCEvent());
-
-//   if (!fcEvent) {
-//     yield put(appointmentUpdatingStatusError('Cannot find selected fcEvent'));
-//   }
-
-//   appointmentUpdatedStatus(action.appointmentId);
-//   updateEventFromCalendar(fcEvent);
-
-//   // try {
-//   //   const { appointment, total, duration, BookingServices2, status,old_duration } = action.appointment;
-//   //   const { memberId, start, end, id } = appointment;
-//   //   let formdt = new FormData();
-//   //   formdt.append('id', id);
-//   //   var newDate;
-//   //   //status to update
-//   //   if (status === 'checkin' || status === 'confirm') {
-//   //     if(parseInt(old_duration) > parseInt(duration)){
-//   //       const newDuration = parseInt(old_duration) - parseInt(duration);
-//   //       newDate = moment(end).subtract(newDuration, 'minutes').format();
-//   //     }else{
-//   //       const newDuration = parseInt(duration) - parseInt(old_duration);
-//   //       newDate = moment(end).add(newDuration, 'minutes').format();
-//   //     }
-//   //   } else {
-//   //     newDate = moment(end).add(duration, 'minutes').format();
-//   //   }
-//   //   const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
-//   //   const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-//   //   const result = yield update_Appointment(requestURL.toString(), {
-//   //     id,
-//   //     Staff_id: memberId,
-//   //     StoreId: storeid,
-//   //     FromTime: start,
-//   //     ToTime: newDate.substr(0, 19),
-//   //     total: total,
-//   //     duration: duration,
-//   //     CheckinStatus: action.appointment.status,
-//   //     PaidStatus: true,
-//   //     Status: 1,
-//   //     CreateDate: new Date().toString().substring(0, 15),
-//   //     BookingServices2: BookingServices2,
-//   //     User_id: kq.data.data.user_id,
-//   //   });
-//   //   if (result) {
-//   //     yield put(updateAppointmentSuccess(result))
-//   //   } else {
-//   //     yield put(updateAppointmentError(error))
-//   //   }
-//   // }
-//   // catch (error) {
-//   //   yield put(updateAppointmentError(error))
-//   // }
-// }
 
 export function* addNewCustomer(action) {
   try {

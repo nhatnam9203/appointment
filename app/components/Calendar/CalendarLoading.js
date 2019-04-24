@@ -20,7 +20,7 @@ export default class CalendarLoading extends Component {
   render() {
     return (
      <LoadingCalendar>
-         <img src={require('../../images/loading.gif')} alt=""/>
+         <img style={{ width:100,height:100 }} src={require('../../images/loading.gif')} alt=""/>
      </LoadingCalendar>
     )
   }

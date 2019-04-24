@@ -454,7 +454,7 @@ class Appointment extends React.Component {
     }
     if (appointment.status === 'PAID') {
       return (
-        <AppointmentWrapper.Header backgroundColor="#00b4f7">
+        <AppointmentWrapper.Header backgroundColor="#00dc00">
           Paid Appointment
         </AppointmentWrapper.Header>
       );

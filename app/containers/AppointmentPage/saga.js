@@ -598,7 +598,7 @@ export function* updateStatusAppointment(action) {
 
 export function* upddateAppointment(action) {
   try {
-    let fcEvent = yield select(makeSelectFCEvent());
+    const fcEvent = yield select(makeSelectFCEvent());
     if (!fcEvent) {
       yield put(appointmentUpdatingStatusError('Cannot find selected fcEvent'));
     }
@@ -613,8 +613,6 @@ export function* upddateAppointment(action) {
     } else if (status === 'checkin') {
       fcEvent.data.status = 'CHECKED_IN';
     }
-    console.log(fcEvent.data.status);
-
     let formdt = new FormData();
     formdt.append('id', id);
     var newDate;
@@ -631,7 +629,6 @@ export function* upddateAppointment(action) {
       newDate = moment(end).add(duration, 'minutes').format();
     }
     yield put(appointmentUpdatedStatus(appointment.id));
-    console.log(fcEvent)
     updateEventFromCalendar(fcEvent);
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);

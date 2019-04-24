@@ -20,7 +20,7 @@ export default class WaitingLoading extends Component {
   render() {
     return (
       <Loading>
-          ...Loading v4.23
+          ...Loading v4.24.11.30
       </Loading>
     )
   }

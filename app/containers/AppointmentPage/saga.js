@@ -245,6 +245,7 @@ export function* getWaitingAppointments() {
 }
 
 export function* getAppointmentsByMembersAndDate() {
+  yield put(loadingCalendar(true))
   const displayedMembers = yield select(makeSelectDisplayedMembers());
   const currentDate = yield select(makeCurrentDay());
   let apiDateQuery =
@@ -801,7 +802,7 @@ export function* appointmentsByMembersData() {
   yield takeLatest(SELECT_DAY, getAppointmentsByMembersAndDate);
 
   // FIXME: This is hard code for real-time calendar
-  // yield takeLatest(UPDATE_CALENDAR_INTERVAL, getAppointmentsByMembersAndDate);
+  yield takeLatest(UPDATE_CALENDAR_INTERVAL, getAppointmentsByMembersAndDate);
 }
 
 export function* displayedMembersData() {

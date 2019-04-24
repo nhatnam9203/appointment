@@ -69,7 +69,7 @@ class Calendar extends React.Component {
   componentWillMount() {
     const { loadWaitingAppointments,loadingCalendar } = this.props;
     loadWaitingAppointments();
-    loadingCalendar(true)
+    // loadingCalendar(true)
   }
 
   reloadComponent = (section) => {

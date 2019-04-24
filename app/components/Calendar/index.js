@@ -67,9 +67,9 @@ class Calendar extends React.Component {
   }
 
   componentWillMount() {
-    const { loadWaitingAppointments,loadingWaiting } = this.props;
+    const { loadWaitingAppointments,loadingCalendar } = this.props;
     loadWaitingAppointments();
-    loadingWaiting(true);
+    loadingCalendar(true)
   }
 
   reloadComponent = (section) => {
@@ -95,11 +95,10 @@ class Calendar extends React.Component {
       isLoadWaiting,
       isLoadCalendar
     } = this.props;
-    console.log(isLoadCalendar)
     return (
       <CalendarWrapper>
         <MainCalendar>
-         {calendarMembers.length === 0 && <CalendarLoading />}
+         {isLoadCalendar === true && <CalendarLoading />}
           <FCAgenda 
           disableCalendar={disableCalendar}
           options={MAIN_CALENDAR_OPTIONS} />

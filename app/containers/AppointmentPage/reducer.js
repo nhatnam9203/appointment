@@ -244,7 +244,6 @@ function appointmentReducer(state = initialState, action) {
       });
 
     case UPDATE_STATUS_APPOINTMENT_SUCCESS:
-      
       return state.updateIn(['appointments', 'calendar'], arr => {
         const member = arr.find(mem =>
           mem.appointments.find(app => app.id === action.appointmentId),

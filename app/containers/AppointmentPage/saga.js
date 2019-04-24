@@ -162,7 +162,9 @@ const statusConvertData = {
   CANCEL: 'cancel',
 };
 
-const statusAdapter = status => statusConvertData[status];
+const statusAdapter = status => statusConvertData[status]
+
+
 
 export function* getMembers() {
   try {
@@ -210,6 +212,7 @@ export function* getWaitingAppointments() {
 
     /* ------------------ REAL DATA FROM API BLOCK ------------------- */
     /* --------------------------------------------------------------- */
+    yield put(loadingWaiting(true))
     const requestURL = new URL(GET_WAITING_APPOINTMENTS_API);
     const currentDate = yield select(makeCurrentDay());
     const apiDateQuery =
@@ -242,7 +245,6 @@ export function* getWaitingAppointments() {
 }
 
 export function* getAppointmentsByMembersAndDate() {
-  loadingCalendar(true);
   const displayedMembers = yield select(makeSelectDisplayedMembers());
   const currentDate = yield select(makeCurrentDay());
   let apiDateQuery =
@@ -262,7 +264,7 @@ export function* getAppointmentsByMembersAndDate() {
       body: requestBody,
     });
     if(response){
-      loadingCalendar(false)
+     yield put(loadingCalendar(false))
     }
 
     const appointments =
@@ -288,6 +290,7 @@ export function* getAppointmentsByMembersAndDate() {
 }
 
 export function* assignAppointment(action) {
+  yield put(loadingWaiting(true));
   const displayedMembers = yield select(makeSelectDisplayedMembers());
   const assignedMember = displayedMembers[action.resourceId];
   const appointment = {
@@ -323,6 +326,7 @@ export function* assignAppointment(action) {
     });
 
     if (result) {
+      yield put(loadingWaiting(false));
       yield put(appointmentAssigned(appointment));
     } else {
       yield put(appointmentAssigningError(result));
@@ -601,6 +605,14 @@ export function* upddateAppointment(action) {
 
     const { appointment, total, duration, BookingServices2, status, old_duration } = action.appointment;
     const { memberId, start, end, id } = appointment;
+
+    if (status === 'unconfirm') {
+      fcEvent.data.status = 'ASSIGNED';
+    } else if (status === 'confirm') {
+      fcEvent.data.status = 'CONFIRMED';
+    } else if (status === 'checkin') {
+      fcEvent.data.status = 'CHECKED_IN';
+    }
     let formdt = new FormData();
     formdt.append('id', id);
     var newDate;
@@ -617,8 +629,7 @@ export function* upddateAppointment(action) {
       newDate = moment(end).add(duration, 'minutes').format();
     }
     yield put(appointmentUpdatedStatus(appointment.id));
-    yield put(updateEventFromCalendar(fcEvent));
-
+    updateEventFromCalendar(fcEvent);
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = yield update_Appointment(requestURL.toString(), {

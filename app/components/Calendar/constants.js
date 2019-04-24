@@ -44,7 +44,8 @@ export const MAIN_CALENDAR_OPTIONS = {
   resources: [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
   schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
 
-  select : (event, delta, revertFunc)=>{
+  select : (selectionInfo)=>{
+
     store.dispatch(openAddingAppointment({date : selectionInfo}));
   },
 

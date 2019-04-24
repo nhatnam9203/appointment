@@ -394,12 +394,18 @@ class Appointment extends React.Component {
     );
     if (appointment.status === "CONFIRMED") {
       this.updateStatus("checkin", servicesUpdate)
+      console.log('next status CONFIRMED');
+      console.log(appointment.status);
     }
     if (appointment.status === "ASSIGNED") {
       this.updateStatus("confirm", servicesUpdate)
+      console.log('next status ASSIGNED');
+      console.log(appointment.status);
     }
     if (appointment.status === "CHECKED_IN") {
       this.updateStatusPaid(appointment.id);
+      console.log('next status CHECKED_IN');
+      console.log(appointment.status);
     }
     this.closeModal();
     // nextStatus(appointment.id, servicesUpdate);

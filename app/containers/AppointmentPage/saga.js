@@ -615,8 +615,6 @@ export function* upddateAppointment(action) {
     } else if (status === 'UNCOFIRM') {
       fcEvent.data.status = 'CONFIRMED';
     }
-
-    console.log(BookingServices2);
     let formdt = new FormData();
     formdt.append('id', id);
     var newDate;

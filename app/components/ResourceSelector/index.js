@@ -162,7 +162,7 @@ class ResourceSelector extends React.Component {
     return (
       <Resource key={index}>
         <Resource.Avatar>
-          <img resourceID = {resource.id} className="staffIdResource" index={index} src={resource.imageUrl} alt={resource.orderNumber} />
+          <img src={resource.imageUrl} alt={resource.orderNumber} />
         </Resource.Avatar>
         <Resource.OrderNumber notEmpty={numberOfAppointments}>
           {resource.orderNumber}

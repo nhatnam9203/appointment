@@ -84,4 +84,6 @@ export const UPDATE_CALENDAR_INTERVAL =
   export const LOADING_WAITING = 'LOADING_WAITING';
   export const LOADING_CALENDAR = 'LOADING_CALENDAR';
 
+  export const TIME_STAFFID = 'TIME_STAFFID';
+
 

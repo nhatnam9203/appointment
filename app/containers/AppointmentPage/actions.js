@@ -62,6 +62,8 @@ import {
   DISABLE_CALENDAR,
   LOADING_CALENDAR,
   LOADING_WAITING,
+  TIME_STAFFID,
+  
 } from './constants';
 
 /**
@@ -437,10 +439,10 @@ export function updateStatusAppointment(appointmentId, bookingServices) {
  * @param  {number} appointmentId
  * @return {object} An action object with a type of UPDATE_STATUS_APPOINTMENT_SUCCESS passing the members
  */
-export function appointmentUpdatedStatus(appointmentId) {
+export function appointmentUpdatedStatus(appointment) {
   return {
     type: UPDATE_STATUS_APPOINTMENT_SUCCESS,
-    appointmentId,
+    appointment,
   };
 }
 
@@ -534,7 +536,15 @@ export const loadingWaiting = (status) => ({
 export const loadingCalendar = (status) => ({
   type: LOADING_CALENDAR,
   status
+});
+
+export const TimeAndStaffID = (data) => ({
+  type: TIME_STAFFID,
+  data
 })
+
+
+
 
 
 

@@ -63,7 +63,7 @@ import {
   LOADING_CALENDAR,
   LOADING_WAITING,
   TIME_STAFFID,
-  
+  ADD_APPOINTMENT_TO_CALENDAR,
 } from './constants';
 
 /**
@@ -541,7 +541,13 @@ export const loadingCalendar = (status) => ({
 export const TimeAndStaffID = (data) => ({
   type: TIME_STAFFID,
   data
+});
+
+export const addAppointmentToCalendar = (appointment) => ({
+  type: ADD_APPOINTMENT_TO_CALENDAR,
+  appointment
 })
+
 
 
 

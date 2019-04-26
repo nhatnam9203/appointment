@@ -43,9 +43,10 @@ import {
   UPDATE_APPOINTMENT_FRONTEND,
   LOADING_WAITING,
   LOADING_CALENDAR,
-  TIME_STAFFID
+  TIME_STAFFID,
+  ADD_APPOINTMENT_TO_CALENDAR,
 } from './constants';
-import { parse } from 'querystring';
+
 
 const initialCurrentDay = moment();
 const firstDayOfWeek = initialCurrentDay.clone().startOf('isoWeek');
@@ -85,7 +86,7 @@ export const initialState = fromJS({
   disable_Calendar: false,
   isLoadingWaiting: false,
   isLoadingCalendar: false,
-  time_staffId : ''
+  time_staffId: ''
 });
 
 function appointmentReducer(state = initialState, action) {
@@ -159,9 +160,6 @@ function appointmentReducer(state = initialState, action) {
           if (assignedMember) {
             assignedMember.appointments.push(action.appointment);
           }
-
-          console.log('array appoinment after update');
-          console.log(arr);
 
           return [...arr];
         })
@@ -250,18 +248,20 @@ function appointmentReducer(state = initialState, action) {
       });
 
     case UPDATE_STATUS_APPOINTMENT_SUCCESS:
-      const {appointmentID,status,BookingServices2,newDate} = action.appointment;
+
+      const { appointmentID, status, BookingServices2, newDate } = action.appointment;
+
       return state.updateIn(['appointments', 'calendar'], arr => {
         const member = arr.find(mem =>
-          mem.appointments.find(app => parseInt(app.id )=== parseInt(appointmentID)),
+          mem.appointments.find(app => parseInt(app.id) === parseInt(appointmentID)),
         );
         if (!member) return [...arr];
         const appointmentIndex = member.appointments.findIndex(
-          app => parseInt(app.id)=== parseInt(appointmentID ),
+          app => parseInt(app.id) === parseInt(appointmentID),
         );
         if (appointmentIndex < 0) return [...arr];
         member.appointments[appointmentIndex].end = newDate.substr(0, 19);
-        // const { status } = member.appointments[appointmentIndex];
+
         if (status === 'checkin') {
           member.appointments[appointmentIndex].status = 'CHECKED_IN';
         }
@@ -276,6 +276,21 @@ function appointmentReducer(state = initialState, action) {
         }
         return [...arr];
       });
+
+    case ADD_APPOINTMENT_TO_CALENDAR:
+      var indexArr;
+      return state.updateIn(['appointments', 'calendar'], arr => {
+        for (let i = 0; i < arr.length; i++) {
+          if (parseInt(arr[i].memberId) === parseInt(action.appointment.memberId)) {
+            indexArr = i;
+          }
+        }
+        action.appointment.appointment.end = action.appointment.newDate;
+        arr[indexArr].appointments.push(action.appointment.appointment);
+
+        return [...arr];
+      });
+
 
     case UPDATE_WAITING_APPOINTMENT:
 
@@ -302,7 +317,7 @@ function appointmentReducer(state = initialState, action) {
       return state.set('isLoadingCalendar', action.status);
 
     case TIME_STAFFID:
-      return state.set('time_staffId',action.data)
+      return state.set('time_staffId', action.data)
     default:
       return state;
   }

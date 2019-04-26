@@ -15,6 +15,8 @@ const EventWrapper = styled.div`
   background: #f4f4f5;
   border: 1px solid #ffffff;
   color: #333333;
+  height : 127px;
+  overflow : hidden;
 `;
 
 const PrevButton = styled.div`
@@ -59,7 +61,7 @@ class FCDragZone extends React.PureComponent {
   updateDimensions() {
     this.setState({
       slidesToShow:
-        Math.floor(($(window).height() - 64 * 3 - 36) / 127) - 1 || 1,
+         Math.round(($(window).height() - 64 * 3 - 36) / 127) || 1
     });
     setInterval(() => {
       $('#waiting-events > div').each(handleDrag);

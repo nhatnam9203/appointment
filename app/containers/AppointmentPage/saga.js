@@ -56,7 +56,8 @@ import {
   loadWaitingAppointments,
   loadingWaiting,
   loadingCalendar,
-  TimeAndStaffID
+  TimeAndStaffID,
+  addAppointmentToCalendar
 } from './actions';
 import {
   makeCurrentDay,
@@ -132,7 +133,7 @@ const appointmentAdapter = appointment => {
   //     options.push(service.name);
   //   });
   // }
-  // console.log(appointment);
+
   return {
     id: appointment.id,
     userFullName: appointment.userFullName,
@@ -266,6 +267,7 @@ export function* getAppointmentsByMembersAndDate() {
       body: requestBody,
     });
 
+
     if (response) {
       yield put(loadingCalendar(false))
     }
@@ -289,53 +291,6 @@ export function* getAppointmentsByMembersAndDate() {
     addEventsToCalendar(currentDate, appointmentsMembers);
   } catch (err) {
     yield put(appointmentByMemberLoadingError(err));
-  }
-}
-
-export function* assignAppointment(action) {
-  yield put(loadingWaiting(true));
-  const displayedMembers = yield select(makeSelectDisplayedMembers());
-  const assignedMember = displayedMembers[action.resourceId];
-  const appointment = {
-    ...action.eventData,
-    memberId: assignedMember.id,
-  };
-  try {
-    const { id, memberId, start, end } = appointment;
-    let formdt = new FormData();
-    formdt.append('id', id);
-    const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
-    var totalduration = 0;
-    const servicesUpdate = kq.data.data.bookingServices2;
-    for (let i = 0; i < servicesUpdate.length; i++) {
-      const index = servicesUpdate[i].search('@');
-      totalduration += parseInt(servicesUpdate[i].charAt(index + 1) + servicesUpdate[i].charAt(index + 2));
-    }
-    const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-    put(loadWaitingAppointments());
-    const result = yield drag_Appointment(requestURL.toString(), {
-      id,
-      Staff_id: memberId,
-      StoreId: storeid,
-      FromTime: start,
-      ToTime: moment(start).add(totalduration, 'minutes').format().substr(0, 19),
-      total: 0,
-      duration: totalduration,
-      CheckinStatus: "checkin",
-      PaidStatus: false,
-      Status: 1,
-      CreateDate: new Date().toString().substring(0, 15),
-      User_id: kq.data.data.user_id
-    });
-
-    if (result) {
-      yield put(loadingWaiting(false));
-      yield put(appointmentAssigned(appointment));
-    } else {
-      yield put(appointmentAssigningError(result));
-    }
-  } catch (err) {
-    yield put(appointmentAssigningError(err));
   }
 }
 
@@ -599,6 +554,66 @@ export function* updateStatusAppointment(action) {
   }
 }
 
+
+export function* assignAppointment(action) {
+  const displayedMembers = yield select(makeSelectDisplayedMembers());
+  const assignedMember = displayedMembers[action.resourceId];
+  const appointment = {
+    ...action.eventData,
+    memberId: assignedMember.id,
+  };
+  try {
+    yield put(loadingWaiting(true));
+    const { id, memberId, start, end } = appointment;
+    let formdt = new FormData();
+
+    formdt.append('id', id);
+    const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
+    var totalduration = 0;
+    const servicesUpdate = kq.data.data.bookingServices2;
+    for (let i = 0; i < servicesUpdate.length; i++) {
+      const index = servicesUpdate[i].search('@');
+      totalduration += parseInt(servicesUpdate[i].charAt(index + 1) + servicesUpdate[i].charAt(index + 2));
+    }
+    const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
+
+    yield put(addAppointmentToCalendar({
+      appointment: appointment,
+      status: 'checkin',
+      BookingServices2: servicesUpdate,
+      newDate: moment(start).add(totalduration, 'minutes').format().substr(0, 19),
+      memberId : appointment.memberId
+    }));
+    const displayedMember_app = yield select(makeSelectCalendarAppointments());
+    const currentDate = yield select(makeCurrentDay());
+    addEventsToCalendar(currentDate, displayedMember_app);
+
+    const result = yield drag_Appointment(requestURL.toString(), {
+      id,
+      Staff_id: memberId,
+      StoreId: storeid,
+      FromTime: start,
+      ToTime: moment(start).add(totalduration, 'minutes').format().substr(0, 19),
+      total: 0,
+      duration: totalduration,
+      CheckinStatus: "checkin",
+      PaidStatus: false,
+      Status: 1,
+      CreateDate: new Date().toString().substring(0, 15),
+      User_id: kq.data.data.user_id,
+      BookingServices2 : servicesUpdate,
+    });
+
+    if (result) {
+      yield put(loadWaitingAppointments())
+    } else {
+      yield put(appointmentAssigningError(result));
+    }
+  } catch (err) {
+    yield put(appointmentAssigningError(err));
+  }
+}
+
 export function* upddateAppointment(action) {
   try {
     const fcEvent = yield select(makeSelectFCEvent());
@@ -634,7 +649,10 @@ export function* upddateAppointment(action) {
     fcEvent.data.end = newDate.substr(0, 19);
 
     yield put(appointmentUpdatedStatus({ appointmentID: appointment.id, status, BookingServices2, newDate }));
-    updateEventFromCalendar(fcEvent);
+    const displayedMember_app = yield select(makeSelectCalendarAppointments());
+    const currentDate = yield select(makeCurrentDay());
+    addEventsToCalendar(currentDate, displayedMember_app);
+
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = yield update_Appointment(requestURL.toString(), {
@@ -676,7 +694,7 @@ export function* addNewCustomer(action) {
         }
       }
     );
-    console.log(result)
+
     if (result.data.codeStatus === 1) {
       const id = result.data.data;
       if (staffID) {

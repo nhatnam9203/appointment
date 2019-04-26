@@ -9,7 +9,8 @@ import {
   selectAppointment,
   openAddingAppointment,
   disableCalendar,
-  TimeAndStaffID
+  TimeAndStaffID,
+  loadWaitingAppointments,
 } from '../../containers/AppointmentPage/actions';
 
 const OPTION_RENDER_TEMPLATE = option =>
@@ -34,7 +35,7 @@ export const MAIN_CALENDAR_OPTIONS = {
   height: 'parent',
   allDaySlot: false,
   nowIndicator: true,
-  selectable : true,
+  selectable: true,
   slotLabelFormat: 'hh:mm A',
   slotDuration: '00:15:00',
   // defaultTimedEventDuration: '01:30:00',
@@ -45,16 +46,16 @@ export const MAIN_CALENDAR_OPTIONS = {
   resources: [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
   schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
 
-  select : (start,end,event,view,resource)=>{
+  select: (start, end, event, view, resource) => {
     const displayedMembers = store
       .getState()
       .getIn(['appointment', 'appointments', 'calendar']);
     const member = displayedMembers[resource.id];
     store.dispatch(openAddingAppointment({}));
-    store.dispatch(TimeAndStaffID({time : start._d.toString().substr(0,24) , staffID : member.memberId}));
+    store.dispatch(TimeAndStaffID({ time: start._d.toString().substr(0, 24), staffID: member.memberId }));
   },
 
-  
+
   eventClick: event => {
     const displayedMembers = store
       .getState()
@@ -98,17 +99,12 @@ export const MAIN_CALENDAR_OPTIONS = {
             ...event,
             status: 'CHECKED_IN',
             start: `${date.format('YYYY-MM-DD')}T${date.format('HH:mm:ss')}`,
-            end: `${date
-              .clone()
-              .add('m', event.duration)
-              .format('YYYY-MM-DD')}T${date
-              .clone()
-              .add('m', event.duration)
-              .format('HH:mm:ss')}`,
+            end: event.end.toString().substr(0, 19),
           },
           resourceId,
         }),
-      );
+      ); 
+
     }
   },
   eventDrop: (event, delta, revertFunc) => {
@@ -139,9 +135,9 @@ export const MAIN_CALENDAR_OPTIONS = {
             .clone()
             .add('m', event.data.duration)
             .format('YYYY-MM-DD')}T${event.start
-            .clone()
-            .add('m', event.data.duration)
-            .format('HH:mm:ss')}`,
+              .clone()
+              .add('m', event.data.duration)
+              .format('HH:mm:ss')}`,
         ),
       );
     }
@@ -203,7 +199,7 @@ export const MAIN_CALENDAR_OPTIONS = {
 };
 
 export const addEventsToCalendar = (currentDate, appointmentsMembers) => {
-  $('#full-calendar').fullCalendar('gotoDate', currentDate);  
+  $('#full-calendar').fullCalendar('gotoDate', currentDate);
   $('#full-calendar').fullCalendar('removeEvents');
   const events = [];
   appointmentsMembers.forEach((member, index) => {
@@ -232,6 +228,7 @@ export const deleteEventFromCalendar = eventId => {
 };
 
 export const updateEventFromCalendar = fcEvent => {
+
   let color;
   let startEditable = true;
   let resourceEditable = true;

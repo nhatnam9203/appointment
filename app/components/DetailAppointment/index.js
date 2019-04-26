@@ -339,8 +339,8 @@ class Appointment extends React.Component {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }).then((result) => {
-        const servicesUpdate = result.data.data.bookingServices2;
+      }).then(async (result) => {
+        const servicesUpdate = await result.data.data.bookingServices2;
         var old_duration  = 0;
         for(let i = 0 ; i<services.length;i++){
           services[i].duration = parseInt(servicesUpdate[i].split('@')[1]);
@@ -534,7 +534,7 @@ class Appointment extends React.Component {
         <td style={{ textAlign: 'center' }}>
           {/* {service.price * (service.duration / 10)} */}
           <input
-            value={this.state.prices[index]}
+            value={this.state.prices[index] || 0}
             style={{ textAlign: 'center' }}
             type="number"
             min="0"

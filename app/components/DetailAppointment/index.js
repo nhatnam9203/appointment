@@ -7,6 +7,7 @@ import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
 import axios from 'axios'
 import {token,POST_DETAIL_APPOINTMENT} from '../../../app-constants'
+import { parse } from '../../../node_modules/querystring';
 
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
@@ -342,9 +343,8 @@ class Appointment extends React.Component {
         const servicesUpdate = result.data.data.bookingServices2;
         var old_duration  = 0;
         for(let i = 0 ; i<services.length;i++){
-          const index = servicesUpdate[i].search('@');//find first index include @ in services string
-          services[i].duration = parseInt(servicesUpdate[i].charAt(index+1) + servicesUpdate[i].charAt(index+2));
-          old_duration += parseInt(servicesUpdate[i].charAt(index+1) + servicesUpdate[i].charAt(index+2));
+          services[i].duration = parseInt(servicesUpdate[i].split('@')[1]);
+          old_duration += parseInt(services[i].duration);
         }
         this.setState({
           services ,
@@ -354,7 +354,7 @@ class Appointment extends React.Component {
 
       await this.setState({prices : []})
       for (let i = 0; i < nextProps.appointment.options.length; i++) {
-        const price = nextProps.appointment.options[i].price * (nextProps.appointment.options[i].duration / 10)
+        const price = nextProps.appointment.options[i].price;
         this.setState({
           prices: [...this.state.prices, price]
         })
@@ -394,18 +394,12 @@ class Appointment extends React.Component {
     );
     if (appointment.status === "CONFIRMED") {
       this.updateStatus("checkin", servicesUpdate)
-      console.log('next status CONFIRMED');
-      console.log(appointment.status);
     }
     if (appointment.status === "ASSIGNED") {
       this.updateStatus("confirm", servicesUpdate)
-      console.log('next status ASSIGNED');
-      console.log(appointment.status);
     }
     if (appointment.status === "CHECKED_IN") {
       this.updateStatusPaid(appointment.id);
-      console.log('next status CHECKED_IN');
-      console.log(appointment.status);
     }
     this.closeModal();
     // nextStatus(appointment.id, servicesUpdate);
@@ -433,10 +427,6 @@ class Appointment extends React.Component {
 
   renderHeader() {
     const { appointment } = this.props;
-
-    console.log("renderHeader");
-    console.log(appointment);
-
     if (appointment.status === 'ASSIGNED') {
       return (
         <AppointmentWrapper.Header backgroundColor="#ffe400">
@@ -683,6 +673,7 @@ class Appointment extends React.Component {
           open
           onOpen={() => this.openModal()}
           onClose={() => this.closeModal()}
+          
         >
           <AppointmentWrapper>
             <AppointmentWrapper.Close onClick={() => this.closeModal()}>

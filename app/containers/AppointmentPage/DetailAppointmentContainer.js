@@ -28,6 +28,7 @@ export function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   appointment: makeSelectAppointment(),
+
 });
 
 const withConnect = connect(

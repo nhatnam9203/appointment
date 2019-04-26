@@ -86,14 +86,19 @@ const makeDisableCalendar = () =>
     appointmentState.get('disable_Calendar'),
   );
 
-  const makeLoadWaiting = () =>
+const makeLoadWaiting = () =>
   createSelector(currentAppointment, appointmentState =>
     appointmentState.get('isLoadingWaiting'),
   );
 
-  const makeLoadCalendar = () =>
+const makeLoadCalendar = () =>
   createSelector(currentAppointment, appointmentState =>
     appointmentState.get('isLoadingCalendar'),
+  );
+
+const makeTimeStaffID = () =>
+  createSelector(currentAppointment, appointmentState =>
+    appointmentState.get('time_staffId'),
   );
 
 export {
@@ -116,4 +121,5 @@ export {
   makeDisableCalendar,
   makeLoadWaiting,
   makeLoadCalendar,
+  makeTimeStaffID,
 };

@@ -56,6 +56,7 @@ import {
   loadWaitingAppointments,
   loadingWaiting,
   loadingCalendar,
+  TimeAndStaffID
 } from './actions';
 import {
   makeCurrentDay,
@@ -230,7 +231,7 @@ export function* getWaitingAppointments() {
       },
       body: formDataWaitingListSaga
     });
-    if(response){
+    if (response) {
       yield put(loadingWaiting(false))
     }
 
@@ -264,8 +265,9 @@ export function* getAppointmentsByMembersAndDate() {
       headers,
       body: requestBody,
     });
-    if(response){
-     yield put(loadingCalendar(false))
+
+    if (response) {
+      yield put(loadingCalendar(false))
     }
 
     const appointments =
@@ -301,7 +303,7 @@ export function* assignAppointment(action) {
   try {
     const { id, memberId, start, end } = appointment;
     let formdt = new FormData();
-    formdt.append('id', id)
+    formdt.append('id', id);
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     var totalduration = 0;
     const servicesUpdate = kq.data.data.bookingServices2;
@@ -318,9 +320,9 @@ export function* assignAppointment(action) {
       FromTime: start,
       ToTime: moment(start).add(totalduration, 'minutes').format().substr(0, 19),
       total: 0,
-      duration: 0,
+      duration: totalduration,
       CheckinStatus: "checkin",
-      PaidStatus: true,
+      PaidStatus: false,
       Status: 1,
       CreateDate: new Date().toString().substring(0, 15),
       User_id: kq.data.data.user_id
@@ -597,88 +599,42 @@ export function* updateStatusAppointment(action) {
   }
 }
 
-// export function* upddateAppointment(action) {
-//   try {
-//     // const fcEvent = yield select(makeSelectFCEvent());
-//     // if (!fcEvent) {
-//     //   yield put(appointmentUpdatingStatusError('Cannot find selected fcEvent'));
-//     // }
-
-//     const { appointment, total, duration, BookingServices2, status, old_duration } = action.appointment;
-//     const { memberId, start, end, id } = appointment;
-
-//     // if (status === 'unconfirm') {
-//     //   fcEvent.data.status = 'ASSIGNED';
-//     // } else if (status === 'confirm') {
-//     //   fcEvent.data.status = 'CONFIRMED';
-//     // } else if (status === 'checkin') {
-//     //   fcEvent.data.status = 'CHECKED_IN';
-//     // }
-//     let formdt = new FormData();
-//     formdt.append('id', id);
-//     var newDate;
-//     //status to update
-//     if (status === 'checkin' || status === 'confirm') {
-//       if (parseInt(old_duration) > parseInt(duration)) {
-//         const newDuration = parseInt(old_duration) - parseInt(duration);
-//         newDate = moment(end).subtract(newDuration, 'minutes').format();
-//       } else {
-//         const newDuration = parseInt(duration) - parseInt(old_duration);
-//         newDate = moment(end).add(newDuration, 'minutes').format();
-//       }
-//     } else {
-//       newDate = moment(end).add(duration, 'minutes').format();
-//     }
-//     // yield put(appointmentUpdatedStatus(appointment.id));
-//     // updateEventFromCalendar(fcEvent);
-
-//     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
-//     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
-//     const result = yield update_Appointment(requestURL.toString(), {
-//       id,
-//       Staff_id: memberId,
-//       StoreId: storeid,
-//       FromTime: start,
-//       ToTime: newDate.substr(0, 19),
-//       total: total,
-//       duration: duration,
-//       CheckinStatus: action.appointment.status,
-//       PaidStatus: true,
-//       Status: 1,
-//       CreateDate: new Date().toString().substring(0, 15),
-//       BookingServices2: BookingServices2,
-//       User_id: kq.data.data.user_id,
-//     });
-//     if (result) {
-//       yield put(updateAppointmentSuccess(result))
-//     } else {
-//       yield put(updateAppointmentError(error))
-//     }
-//   }
-//   catch (error) {
-//     yield put(updateAppointmentError(error))
-//   }
-// }
-
 export function* upddateAppointment(action) {
   try {
-    const { appointment, total, duration, BookingServices2, status,old_duration } = action.appointment;
+    const fcEvent = yield select(makeSelectFCEvent());
+    if (!fcEvent) {
+      yield put(appointmentUpdatingStatusError('Cannot find selected fcEvent'));
+    }
+    const { appointment, total, duration, BookingServices2, status, old_duration } = action.appointment;
     const { memberId, start, end, id } = appointment;
+    const fcEventStatus = fcEvent.data.status;
+    if (fcEventStatus === 'ASSIGNED') {
+      fcEvent.data.status = 'CHECKD_IN';
+    } else if (status === 'CONFIRMED') {
+      fcEvent.data.status = 'CHECKD_IN';
+    } else if (status === 'UNCOFIRM') {
+      fcEvent.data.status = 'CONFIRMED';
+    }
     let formdt = new FormData();
     formdt.append('id', id);
     var newDate;
     //status to update
     if (status === 'checkin' || status === 'confirm') {
-      if(parseInt(old_duration) > parseInt(duration)){
+      if (parseInt(old_duration) > parseInt(duration)) {
         const newDuration = parseInt(old_duration) - parseInt(duration);
         newDate = moment(end).subtract(newDuration, 'minutes').format();
-      }else{
+      } else {
         const newDuration = parseInt(duration) - parseInt(old_duration);
         newDate = moment(end).add(newDuration, 'minutes').format();
       }
     } else {
       newDate = moment(end).add(duration, 'minutes').format();
     }
+
+    fcEvent.data.end = newDate.substr(0, 19);
+
+    yield put(appointmentUpdatedStatus({ appointmentID: appointment.id, status, BookingServices2, newDate }));
+    updateEventFromCalendar(fcEvent);
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
     const result = yield update_Appointment(requestURL.toString(), {
@@ -710,9 +666,9 @@ export function* upddateAppointment(action) {
 
 export function* addNewCustomer(action) {
   try {
-    const { first_name, last_name, phoneNumber } = action.customer;
+    const { first_name, last_name, phone, staffID, time } = action.customer;
     const result = yield axios.post(POST_ADD_CUSTOMER, {
-      first_name, last_name, phone: phoneNumber
+      first_name, last_name, phone: phone
     }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -720,12 +676,22 @@ export function* addNewCustomer(action) {
         }
       }
     );
+    console.log(result)
     if (result.data.codeStatus === 1) {
-      const id = result.data.data
-      window.postMessage(JSON.stringify({
-        consumerId: id,
-        action: 'newAppointment'
-      }))
+      const id = result.data.data;
+      if (staffID) {
+        window.postMessage(JSON.stringify({
+          consumerId: result.data.data.user_id,
+          staffid: staffID,
+          from_time: time,
+          action: 'newAppointment'
+        }));
+      } else {
+        window.postMessage(JSON.stringify({
+          consumerId: id,
+          action: 'newAppointment'
+        }));
+      }
       yield put(addCustomerSuccess(true))
     } else {
       yield put(addCustomerSuccess(true))
@@ -738,19 +704,31 @@ export function* addNewCustomer(action) {
 export function* checkPhoneCustomer(action) {
   try {
     let formdt = new FormData();
-    formdt.append('phone', action.phone);
+    const { phone, staffID, time } = action.phone;
+    formdt.append('phone', phone);
     const result = yield axios.post(POST_CHECK_PHONE_CUSTOMER, formdt, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
     });
+
     if (result.data.data === "{}") {
       yield put(checkPhoneNumberCustomerSuccess(true))
     } else {
-      window.postMessage(JSON.stringify({
-        consumerId: result.data.data.user_id,
-        action: 'newAppointment'
-      }));
+      if (staffID) {
+        window.postMessage(JSON.stringify({
+          consumerId: result.data.data.user_id,
+          staffid: staffID,
+          from_time: time,
+          action: 'newAppointment'
+        }));
+      } else {
+        window.postMessage(JSON.stringify({
+          consumerId: result.data.data.user_id,
+          action: 'newAppointment'
+        }));
+        yield put(TimeAndStaffID(''));
+      }
       yield put(checkPhoneNumberCustomerError(true));
     }
   } catch (error) {
@@ -795,10 +773,10 @@ export function* appointmentsByMembersData() {
     LOAD_APPOINTMENTS_BY_MEMBERS,
     getAppointmentsByMembersAndDate,
   );
-  yield takeLatest(
-    UPDATE_STATUS_APPOINTMENT_SUCCESS,
-    getAppointmentsByMembersAndDate,
-  );
+  // yield takeLatest(
+  //   UPDATE_STATUS_APPOINTMENT_SUCCESS,
+  //   getAppointmentsByMembersAndDate,
+  // );
   yield takeLatest(SELECT_DAY, getAppointmentsByMembersAndDate);
 
   // FIXME: This is hard code for real-time calendar

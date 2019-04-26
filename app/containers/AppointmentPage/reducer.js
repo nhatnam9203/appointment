@@ -42,8 +42,10 @@ import {
   DISABLE_CALENDAR,
   UPDATE_APPOINTMENT_FRONTEND,
   LOADING_WAITING,
-  LOADING_CALENDAR
+  LOADING_CALENDAR,
+  TIME_STAFFID
 } from './constants';
+import { parse } from 'querystring';
 
 const initialCurrentDay = moment();
 const firstDayOfWeek = initialCurrentDay.clone().startOf('isoWeek');
@@ -82,7 +84,8 @@ export const initialState = fromJS({
   addCustomer_error: false,
   disable_Calendar: false,
   isLoadingWaiting: false,
-  isLoadingCalendar: false
+  isLoadingCalendar: false,
+  time_staffId : ''
 });
 
 function appointmentReducer(state = initialState, action) {
@@ -156,6 +159,10 @@ function appointmentReducer(state = initialState, action) {
           if (assignedMember) {
             assignedMember.appointments.push(action.appointment);
           }
+
+          console.log('array appoinment after update');
+          console.log(arr);
+
           return [...arr];
         })
         .updateIn(['appointments', 'waiting'], arr => {
@@ -163,11 +170,10 @@ function appointmentReducer(state = initialState, action) {
             appointment => appointment.id === action.appointment.id,
           );
           if (movedAppointmentIndex < 0) return [...arr];
-
           arr.splice(movedAppointmentIndex, 1);
-
           return [...arr];
         });
+
 
     case MOVE_APPOINTMENT_SUCCESS:
       return state.updateIn(['appointments', 'calendar'], arr => {
@@ -244,31 +250,30 @@ function appointmentReducer(state = initialState, action) {
       });
 
     case UPDATE_STATUS_APPOINTMENT_SUCCESS:
+      const {appointmentID,status,BookingServices2,newDate} = action.appointment;
       return state.updateIn(['appointments', 'calendar'], arr => {
         const member = arr.find(mem =>
-          mem.appointments.find(app => app.id === action.appointmentId),
+          mem.appointments.find(app => parseInt(app.id )=== parseInt(appointmentID)),
         );
         if (!member) return [...arr];
-
         const appointmentIndex = member.appointments.findIndex(
-          app => app.id === action.appointmentId,
+          app => parseInt(app.id)=== parseInt(appointmentID ),
         );
         if (appointmentIndex < 0) return [...arr];
-
-        const { status } = member.appointments[appointmentIndex];
-        if (status === 'ASSIGNED') {
+        member.appointments[appointmentIndex].end = newDate.substr(0, 19);
+        // const { status } = member.appointments[appointmentIndex];
+        if (status === 'checkin') {
           member.appointments[appointmentIndex].status = 'CHECKED_IN';
         }
-        if (status === 'UNCONFIRMED') {
+        if (status === 'confirm') {
           member.appointments[appointmentIndex].status = 'CONFIRMED';
         }
-        if (status === 'CONFIRMED') {
-          member.appointments[appointmentIndex].status = 'CHECKED_IN';
+        if (status === 'unconfirm') {
+          member.appointments[appointmentIndex].status = 'UNCONFIRMED';
         }
-        if (status === 'CHECKED_IN') {
+        if (status === 'paid') {
           member.appointments[appointmentIndex].status = 'PAID';
         }
-
         return [...arr];
       });
 
@@ -296,6 +301,8 @@ function appointmentReducer(state = initialState, action) {
     case LOADING_CALENDAR:
       return state.set('isLoadingCalendar', action.status);
 
+    case TIME_STAFFID:
+      return state.set('time_staffId',action.data)
     default:
       return state;
   }

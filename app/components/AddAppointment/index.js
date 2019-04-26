@@ -239,19 +239,25 @@ class AddAppointment extends React.Component {
       isOpenAddingPopup: false,
       phoneNumber: '',
     });
-    const { closeAddingAppointment, checkPhoneNumberCustomerSuccess, checkPhoneNumberCustomerError } = this.props;
+    const { closeAddingAppointment, checkPhoneNumberCustomerSuccess,closeTimeAndStaffID, checkPhoneNumberCustomerError } = this.props;
     checkPhoneNumberCustomerError(false);
     checkPhoneNumberCustomerSuccess(false);
     closeAddingAppointment();
+    closeTimeAndStaffID('');
   }
 
   handleSubmitVerifyPhone(e) {
     e.preventDefault();
-    this.props.checkPhoneNumberCustomer(this.state.phoneNumber);
+    const {time,staffID} = this.props.TimeAndStaffID
+    this.props.checkPhoneNumberCustomer({
+      phone : this.state.phoneNumber,
+      time,staffID
+    });
   }
   handleSubmitAppointment = () => {
+    const {time,staffID} = this.props.TimeAndStaffID
     const { first_name, last_name, phoneNumber } = this.state;
-    this.props.addCustomer({ first_name, last_name, phone: phoneNumber })
+    this.props.addCustomer({ first_name, last_name, phone: phoneNumber,time,staffID });
   }
 
   handleChange(e) {
@@ -278,9 +284,11 @@ class AddAppointment extends React.Component {
   );
 
   phoneNumberError = () => {
+    const { checkPhoneNumberCustomerError } = this.props;
     this.setState({ error_phone: 'This phone number already exist !!!' })
     setTimeout(() => {
-      this.setState({ error_phone: '' })
+      this.setState({ error_phone: '' });
+      checkPhoneNumberCustomerError(false)
     }, 3000);
   }
 
@@ -313,10 +321,12 @@ class AddAppointment extends React.Component {
     if (nextProps.checkPhoneError === true) {
       this.phoneNumberError();
     }
-    if (nextProps.checkPhoneSuccess === true) {
-      this.openFormInsertAfterCheckPhone();
-      if (nextProps.StateAddCustomerSuccess === true) {
-        this.showInsertCustomerSuccess();
+    if (nextProps.checkPhoneError === false) {
+      if (nextProps.checkPhoneSuccess === true) {
+        this.openFormInsertAfterCheckPhone();
+        if (nextProps.StateAddCustomerSuccess === true) {
+          this.showInsertCustomerSuccess();
+        }
       }
     }
   }

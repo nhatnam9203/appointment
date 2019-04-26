@@ -9,6 +9,7 @@ import {
   selectAppointment,
   openAddingAppointment,
   disableCalendar,
+  TimeAndStaffID
 } from '../../containers/AppointmentPage/actions';
 
 const OPTION_RENDER_TEMPLATE = option =>
@@ -44,9 +45,13 @@ export const MAIN_CALENDAR_OPTIONS = {
   resources: [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
   schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
 
-  select : (selectionInfo)=>{
-
-    store.dispatch(openAddingAppointment({date : selectionInfo}));
+  select : (start,end,event,view,resource)=>{
+    const displayedMembers = store
+      .getState()
+      .getIn(['appointment', 'appointments', 'calendar']);
+    const member = displayedMembers[resource.id];
+    store.dispatch(openAddingAppointment({}));
+    store.dispatch(TimeAndStaffID({time : start._d.toString().substr(0,24) , staffID : member.memberId}));
   },
 
   
@@ -91,7 +96,7 @@ export const MAIN_CALENDAR_OPTIONS = {
         assignAppointment({
           eventData: {
             ...event,
-            status: 'ASSIGNED',
+            status: 'CHECKED_IN',
             start: `${date.format('YYYY-MM-DD')}T${date.format('HH:mm:ss')}`,
             end: `${date
               .clone()

@@ -17,7 +17,6 @@ import WaitingLoading from './WaitingLoading'
 import CalendarLoading from './CalendarLoading'
 import { loadingWaiting } from '../../containers/AppointmentPage/actions';
 
-
 const CalendarWrapper = styled.div`
   display: flex;
   border-left: 2px solid #3883bb;
@@ -65,6 +64,7 @@ class Calendar extends React.Component {
     super();
     window.Calendar = this;
   }
+
 
   componentWillMount() {
     const { loadWaitingAppointments,loadingCalendar } = this.props;

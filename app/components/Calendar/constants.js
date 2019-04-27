@@ -10,7 +10,6 @@ import {
   openAddingAppointment,
   disableCalendar,
   TimeAndStaffID,
-  loadWaitingAppointments,
 } from '../../containers/AppointmentPage/actions';
 
 const OPTION_RENDER_TEMPLATE = option =>
@@ -54,7 +53,6 @@ export const MAIN_CALENDAR_OPTIONS = {
     store.dispatch(openAddingAppointment({}));
     store.dispatch(TimeAndStaffID({ time: start._d.toString().substr(0, 24), staffID: member.memberId }));
   },
-
 
   eventClick: event => {
     const displayedMembers = store

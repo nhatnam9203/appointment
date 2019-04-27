@@ -741,7 +741,6 @@ export function* checkPhoneCustomer(action) {
     if (result.data.data === "{}") {
       yield put(checkPhoneNumberCustomerSuccess(true))
     } else {
-      console.log(result.data.data.user_id);
       if (staffID) {
         window.postMessage(JSON.stringify({
           consumerId: result.data.data.user_id,

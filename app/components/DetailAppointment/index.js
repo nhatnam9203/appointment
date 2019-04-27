@@ -7,7 +7,7 @@ import { FaTimesCircle } from 'react-icons/fa';
 import Enter from '../../images/enter.png';
 import axios from 'axios'
 import {token,POST_DETAIL_APPOINTMENT} from '../../../app-constants'
-import { parse } from '../../../node_modules/querystring';
+
 
 const AppPopup = styled(Popup)`
   border-radius: 1.5rem;
@@ -392,14 +392,14 @@ class Appointment extends React.Component {
     const servicesUpdate = services.map(
       service => `${service.id}@${service.duration}@${appointment.memberId}`,
     );
-    if (appointment.status === "CONFIRMED") {
-      this.updateStatus("checkin", servicesUpdate)
-    }
     if (appointment.status === "ASSIGNED") {
       this.updateStatus("confirm", servicesUpdate)
-    }
-    if (appointment.status === "CHECKED_IN") {
+    } else if (appointment.status === "CONFIRMED") {
+      this.updateStatus("checkin", servicesUpdate)
+    } else if (appointment.status === "CHECKED_IN") {
       this.updateStatusPaid(appointment.id);
+    } else{
+      alert(`status appointment ${appointment.status} id appointment ${appointment.id}`);
     }
     this.closeModal();
     // nextStatus(appointment.id, servicesUpdate);

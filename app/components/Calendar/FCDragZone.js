@@ -5,6 +5,8 @@ import { FaCaretUp, FaCaretDown } from 'react-icons/fa';
 
 import $ from 'jquery';
 import 'jquery-ui';
+import moment from 'moment';
+
 
 const DragZoneWrapper = styled.div`
   height: calc(100vh - 4rem - 4rem - 4rem);
@@ -34,12 +36,22 @@ const NextButton = styled(PrevButton)`
   bottom: 0;
 `;
 
+function getDiffHoursString(start, end) {
+  if (start && end) {
+    let minutes = moment.utc(moment(end).diff(moment(start), 'minutes'))._i;
+    return moment.utc().startOf('day').add({ minutes: minutes }).format('HH:mm');
+  }
+  return null;
+}
+
+
 function handleDrag() {
   const eventInformation = $(this).data('event-information');
   $(this).data('event', {
     data: eventInformation,
     color: '#00b4f7',
     stick: true,
+    duration: getDiffHoursString(eventInformation.start, eventInformation.end),
   });
 
   $(this).draggable({
@@ -61,7 +73,7 @@ class FCDragZone extends React.PureComponent {
   updateDimensions() {
     this.setState({
       slidesToShow:
-         Math.round(($(window).height() - 64 * 3 - 36) / 127) || 1
+        Math.round(($(window).height() - 64 * 3 - 36) / 127) || 1
     });
     setInterval(() => {
       $('#waiting-events > div').each(handleDrag);

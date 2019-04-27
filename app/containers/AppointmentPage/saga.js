@@ -630,10 +630,12 @@ export function* upddateAppointment(action) {
     } else if (status === 'UNCOFIRM') {
       fcEvent.data.status = 'CONFIRMED';
     }
+
     let formdt = new FormData();
     formdt.append('id', id);
     var newDate;
     //status to update
+
     if (status === 'checkin' || status === 'confirm') {
       if (parseInt(old_duration) > parseInt(duration)) {
         const newDuration = parseInt(old_duration) - parseInt(duration);
@@ -647,11 +649,16 @@ export function* upddateAppointment(action) {
     }
 
     fcEvent.data.end = newDate.substr(0, 19);
-
+    if(status === 'cancel'){
+      yield put(appointmentCanceled(appointment.id));
+      deleteEventFromCalendar(fcEvent._id);
+      yield put(deselectAppointment());
+    }else{
     yield put(appointmentUpdatedStatus({ appointmentID: appointment.id, status, BookingServices2, newDate }));
     const displayedMember_app = yield select(makeSelectCalendarAppointments());
     const currentDate = yield select(makeCurrentDay());
     addEventsToCalendar(currentDate, displayedMember_app);
+    }
 
     const kq = yield detail_Appointment(POST_DETAIL_APPOINTMENT + '/id', formdt);
     const requestURL = new URL(POST_STATUS_APPOINTMENT_API);
@@ -686,7 +693,7 @@ export function* addNewCustomer(action) {
   try {
     const { first_name, last_name, phone, staffID, time } = action.customer;
     const result = yield axios.post(POST_ADD_CUSTOMER, {
-      first_name, last_name, phone: phone
+      first_name, last_name, phone: phone,status : 1,
     }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -697,9 +704,10 @@ export function* addNewCustomer(action) {
 
     if (result.data.codeStatus === 1) {
       const id = result.data.data;
+      console.log(result.data)
       if (staffID) {
         window.postMessage(JSON.stringify({
-          consumerId: result.data.data.user_id,
+          consumerId: result.data.data,
           staffid: staffID,
           from_time: time,
           action: 'newAppointment'
@@ -733,6 +741,7 @@ export function* checkPhoneCustomer(action) {
     if (result.data.data === "{}") {
       yield put(checkPhoneNumberCustomerSuccess(true))
     } else {
+      console.log(result.data.data.user_id);
       if (staffID) {
         window.postMessage(JSON.stringify({
           consumerId: result.data.data.user_id,
